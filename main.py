@@ -3,7 +3,7 @@ from database import SessionLocal
 
 import models, schema
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 # creating table
@@ -27,22 +27,26 @@ def create_user(user: schema.UsersCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
-@app.get("/users/{user_id}", response_model=schema.UsersOut)
+@app.get("/users/id/{user_id}", response_model=schema.UsersOut)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.Users).filter(models.Users.id == user_id).first()
-    # ToDO: handle user not found
+    if not user:
+        raise HTTPException(status_code=404, detail="Person not found")
     return user
 
-@app.get("/users/{user_id}", response_model=schema.UsersOut)
+@app.get("/users/by_name", response_model=schema.UsersOut)
 def get_user_by_name(full_name: str, db: Session = Depends(get_db)):
+    print("full_name received:", full_name)
     user = db.query(models.Users).filter(models.Users.full_name == full_name).first()
-    # ToDO: handle user not found
+    if not user:
+        raise HTTPException(status_code=404, detail="Person not found")
     return user
 
 @app.put("/users/{user_id}", response_model=schema.UsersOut)
 def update_user(user_id: int, user_updated: schema.UsersUpdate, db: Session = Depends(get_db)):
     user = db.query(models.Users).filter(models.Users.id == user_id).first()
-    # ToDO: handle user not found
+    if not user:
+        raise HTTPException(status_code=404, detail="Person not found")
     for key, value in user_updated.model_dump().items():
         # update attributes in user object
         setattr(user, key, value)
@@ -53,7 +57,8 @@ def update_user(user_id: int, user_updated: schema.UsersUpdate, db: Session = De
 @app.delete("/users/{user_id}")
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.Users).filter(models.Users.id == user_id).first()
-    # ToDO: handle user not found
+    if not user:
+        raise HTTPException(status_code=404, detail="Person not found")
     db.delete(user)
     db.commit()
     return {"detail": "User deleted"}
