@@ -6,6 +6,7 @@ from database import get_db
 # creating router
 router = APIRouter(prefix="/users", tags=["users"])
 
+# endpoints for CRUD operations
 @router.post("/", response_model=schema.UsersOut)
 def create_user(user: schema.UsersCreate, db: Session = Depends(get_db)):
     return crud.create_user(db, user)
