@@ -47,8 +47,10 @@ def update_user(user_id: int, user_updated: schema.UsersUpdate, db: Session = De
     user = db.query(models.Users).filter(models.Users.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Person not found")
-    for key, value in user_updated.model_dump().items():
-        # update attributes in user object
+    
+    # Get only the fields that were provided in the request
+    update_data = user_updated.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(user, key, value)
     db.commit()
     db.refresh(user)
