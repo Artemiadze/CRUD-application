@@ -11,11 +11,11 @@ uvicorn app.main:app --reload
 http://127.0.0.1:8000/docs
 ```
 
-3. For example, enter in request body:
+3. For example, enter in request body in the field 'POST: Create User':
 ```json
 {
   "full_name": "Иванов Иван Петрович",
-  "phone": "+79995553322",
+  "phone_number": "+79995553322",
   "birth_date": "1984-01-01",
   "passport": "4321 987654"
 }
