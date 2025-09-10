@@ -30,9 +30,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.database import Base, get_db
 from app.main import app
+ 
+db_folder = "./tests/database"
+os.makedirs(db_folder, exist_ok=True)
 
-# Create a new database session for testing
-SQLALCHEMY_DATABASE_URL = "sqlite:///./people.db"
+SQLALCHEMY_DATABASE_URL = f"sqlite:///{db_folder}/users.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
