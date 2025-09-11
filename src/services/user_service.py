@@ -6,9 +6,6 @@ class UserService:
         self.repo = repo
 
     def create_user(self, user: User):
-        user.validate_age()
-
-        
         if self.repo.get_user_by_name(user.full_name):
             raise DomainValidationError("The name is already taken")
         if self.repo.get_user_by_phone(user.phone_number):
@@ -24,10 +21,7 @@ class UserService:
     def get_user_by_name(self, full_name: str):
         return self.repo.get_user_by_name(full_name)
     
-    def update_user(self, user: User):
-        if user.birth_date:
-            user.validate_age()
-        
+    def update_user(self, user: User):        
         updated_user = self.repo.get_user(user.id)
         if not updated_user:
             return None

@@ -81,8 +81,13 @@ class UsersBase(BaseModel):
         return value.upper()
 
 class UsersCreate(UsersBase):
-    # ToDO
-    pass
+    @field_validator("birth_date")
+    def check_age(cls, v: date):
+        today = date.today()
+        age = today.year - v.year - ((today.month, today.day) < (v.month, v.day))
+        if age < 14:
+            raise ValueError("User must be at least 14 years old")
+        return v
 
 class UsersUpdate(UsersBase):
     full_name: Optional[str] = None
@@ -137,7 +142,11 @@ class UsersUpdate(UsersBase):
         elif not isinstance(value, date):
             raise ValueError('Birth date must be a valid date')
         
-        if value > date.today():
+        today = date.today()
+        age = today.year - value.year - ((today.month, today.day) < (value.month, value.day))
+        if age < 14:
+            raise ValueError('User must be at least 14 years old')
+        if value > today:
             raise ValueError('Birth date cannot be in the future')
         return value
 
