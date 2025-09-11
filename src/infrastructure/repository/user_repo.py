@@ -6,7 +6,8 @@ class UserRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def _map_to_domain(self, obj: UserModel) -> User:
+    @staticmethod
+    def _to_domain(self, obj: UserModel) -> User:
         return User(
             id=obj.id,
             full_name=obj.full_name,
@@ -21,30 +22,30 @@ class UserRepository:
         self.db.add(obj)
         self.db.commit()
         self.db.refresh(obj)
-        return self._map_to_domain(obj)
+        return self._to_domain(obj)
 
     def get_user(self, user_id: int):
         obj = self.db.query(UserModel).filter(UserModel.id == user_id).first()
         if obj:
-            return self._map_to_domain(obj)
+            return self._to_domain(obj)
         return None
 
     def get_user_by_name(self, full_name: str):
         obj = self.db.query(UserModel).filter(UserModel.full_name == full_name).first()
         if obj:
-            return self._map_to_domain(obj)
+            return self._to_domain(obj)
         return None
     
     def get_user_by_phone(self, phone_number: str):
         obj = self.db.query(UserModel).filter(UserModel.phone_number == phone_number).first()
         if obj:
-            return self._map_to_domain(obj)
+            return self._to_domain(obj)
         return None
 
     def get_user_by_passport(self, passport: str):
         obj = self.db.query(UserModel).filter(UserModel.passport == passport).first()
         if obj:
-            return self._map_to_domain(obj)
+            return self._to_domain(obj)
         return None
 
     def update(self, user: User) -> User:
@@ -64,7 +65,7 @@ class UserRepository:
 
         self.db.commit()
         self.db.refresh(obj)
-        return self._map_to_domain(obj)
+        return self._to_domain(obj)
 
     def delete_user(self, user_id: int):
         obj = self.db.query(UserModel).filter(UserModel.id == user_id).first()
