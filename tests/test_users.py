@@ -1,5 +1,3 @@
-from app import models
-
 def test_create_user_success(client):
     payload = {
         "full_name": "Иван Иванов",
