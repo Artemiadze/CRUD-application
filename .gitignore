@@ -1,6 +1,13 @@
 /src/__pycache__
 /src/database
 /src/api/routers/__pycache__
+/src/core/__pycache__
+/src/infrastructure/__pycache__
+/src/infrastructure/repository/__pycache__
+/src/infrastructure/models/__pycache__
+/src/domain/__pycache__
+/src/schemas/__pycache__
+/src/services/__pycache__
 
 /tests/__pycache__
 /tests/database

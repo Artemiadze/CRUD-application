@@ -6,7 +6,6 @@ class UserRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    @staticmethod
     def _to_domain(self, obj: UserModel) -> User:
         return User(
             id=obj.id,

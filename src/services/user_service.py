@@ -1,5 +1,6 @@
 from src.domain.users import User, DomainValidationError
 from src.infrastructure.repository.user_repo import UserRepository
+from src.schemas.user_schema import UsersUpdate
 
 class UserService:
     def __init__(self, repo: UserRepository):
@@ -21,27 +22,38 @@ class UserService:
     def get_user_by_name(self, full_name: str):
         return self.repo.get_user_by_name(full_name)
     
-    def update_user(self, user: User):        
-        updated_user = self.repo.get_user(user.id)
-        if not updated_user:
+    def update_user(self, user_id: int, user_updated: UsersUpdate):
+        # Получаем существующего пользователя
+        existing_user = self.repo.get_user(user_id)
+        if not existing_user:
             return None
-        
-        if user.full_name and user.full_name != updated_user.full_name:
-            if self.repo.get_user_by_name(user.full_name):
+
+        # Проверяем уникальность полей, если они обновляются
+        if user_updated.full_name and user_updated.full_name != existing_user.full_name:
+            if self.repo.get_user_by_name(user_updated.full_name):
                 raise DomainValidationError("The name is already taken")
-        
-        if user.phone_number and user.phone_number != updated_user.phone_number:
-            if self.repo.get_user_by_phone(user.phone_number):
+
+        if user_updated.phone_number and user_updated.phone_number != existing_user.phone_number:
+            if self.repo.get_user_by_phone(user_updated.phone_number):
                 raise DomainValidationError("The phone number is already taken")
-        
-        if user.passport and user.passport != updated_user.passport:
-            if self.repo.get_user_by_passport(user.passport):
+
+        if user_updated.passport and user_updated.passport != existing_user.passport:
+            if self.repo.get_user_by_passport(user_updated.passport):
                 raise DomainValidationError("The passport is already taken")
-        
-        return self.repo.update(user)
+
+        # Обновляем только те поля, которые пришли в UsersUpdate
+        updated_user = User(
+            id=user_id,
+            full_name=user_updated.full_name or existing_user.full_name,
+            phone_number=user_updated.phone_number or existing_user.phone_number,
+            birth_date=user_updated.birth_date or existing_user.birth_date,
+            passport=user_updated.passport or existing_user.passport
+        )
+
+        return self.repo.update(updated_user)
     
     def delete_user(self, user_id: int):
         user = self.repo.get_user(user_id)
         if not user:
             return None
-        return self.repo.delete(user_id)
+        return self.repo.delete_user(user_id)
