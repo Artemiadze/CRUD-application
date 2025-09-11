@@ -1,6 +1,6 @@
 /src/__pycache__
 /src/database
-/src/routers/__pycache__
+/src/app/routers/__pycache__
 
 /tests/__pycache__
 /tests/database

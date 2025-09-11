@@ -34,6 +34,18 @@ class UserRepository:
         if obj:
             return self._map_to_domain(obj)
         return None
+    
+    def get_user_by_phone(self, phone_number: str):
+        obj = self.db.query(UserModel).filter(UserModel.phone_number == phone_number).first()
+        if obj:
+            return self._map_to_domain(obj)
+        return None
+
+    def get_user_by_passport(self, passport: str):
+        obj = self.db.query(UserModel).filter(UserModel.passport == passport).first()
+        if obj:
+            return self._map_to_domain(obj)
+        return None
 
     def update(self, user: User) -> User:
         obj = self.db.query(UserModel).filter(UserModel.id == user.id).first()
