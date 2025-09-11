@@ -1,11 +1,17 @@
 # CRUP application on Fast API
 
 ## How to use
-1. Start the virtual environment:
+1. Create the virtual environment:
+
+```bash
+python -m venv <title_venv>
+```
+
+2. Launch the virtual environment:
 
 Windows:
 ```bash
-. .\<venv>\Scripts\Activate.ps1
+. .\<title_venv>\Scripts\Activate.ps1
 ```
 
 Linux\MacOS:
@@ -13,22 +19,22 @@ Linux\MacOS:
 source <venv>/bin/activate
 ```
 
-2. Install the requirement:
+3. Install the requirement:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Write to console:
+4. Write to console:
 ```bash
-uvicorn app.main:app --reload
+uvicorn src.main:app --reload
 ```
 
-4. Open the browser and go to:
+5. Open the browser and go to:
 ```bash
 http://127.0.0.1:8000/docs
 ```
 
-5. For example, enter in request body in the field 'POST: Create User':
+6. For example, enter in request body in the field 'POST: Create User':
 ```json
 {
   "full_name": "Иванов Иван Петрович",
