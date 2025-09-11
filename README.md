@@ -1,7 +1,7 @@
 # CRUP application on Fast API
 
 ## How to use
-1. Start the virtual environment:
+1. Start the virtual environment:\
 Windows:
 ```bash
 . .\<venv>\Scripts\Activate.ps1
