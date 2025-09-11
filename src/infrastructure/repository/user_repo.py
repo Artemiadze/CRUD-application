@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Session
 from src.domain.users import User
 from src.infrastructure.models.users import UserModel
+from src.domain.interfaces.iuser_repo import IUserRepository
 
-class UserRepository:
+class UserRepository(IUserRepository):
     def __init__(self, db: Session):
         self.db = db
 

@@ -1,9 +1,10 @@
 from src.domain.users import User, DomainValidationError
 from src.infrastructure.repository.user_repo import UserRepository
 from src.schemas.user_schema import UsersUpdate
+from src.domain.interfaces.iuser_repo import IUserRepository
 
 class UserService:
-    def __init__(self, repo: UserRepository):
+    def __init__(self, repo: IUserRepository):
         self.repo = repo
 
     def create_user(self, user: User):
