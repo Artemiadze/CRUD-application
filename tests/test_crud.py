@@ -1,4 +1,4 @@
-from app import crud, schema
+from src import crud, schema
 
 def test_create_item(db_session):
     user_in = schema.UsersCreate(full_name="Alice", phone_number="89306152516", birth_date="1990-01-01", passport="1111 111111")

@@ -1,5 +1,5 @@
 import pytest
-from app import schema
+from src import schema
 from datetime import date
 from pydantic import ValidationError
 

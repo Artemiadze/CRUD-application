@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 import os
  
-db_folder = "./app/database"
+db_folder = "./src/database"
 os.makedirs(db_folder, exist_ok=True)
 
 SQLALCHEMY_DATABASE_URL = f"sqlite:///{db_folder}/users.db"

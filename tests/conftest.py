@@ -8,8 +8,8 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.database import Base, get_db
-from app.main import app
+from src.database import Base, get_db
+from src.main import app
 
 # creating a separate database for tests
 db_folder = "./tests/database"
