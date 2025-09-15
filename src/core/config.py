@@ -22,7 +22,7 @@ class UserLoggerAdapter(logging.LoggerAdapter):
 # Configuring logging
 def setup_logging():
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         filename = "ServiceLogs.log",
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
@@ -31,7 +31,7 @@ def setup_logging():
     return logger
 
 
-main_logger = setup_logging()
+logger = setup_logging()
 
 settings = Settings()
 
@@ -41,4 +41,4 @@ def get_user_logger(user_id: int | None = None):
     Factory function to get a logger with user_id context.
     If user_id is None, it defaults to 'non'.
     """
-    return UserLoggerAdapter(main_logger, {"user_id": user_id})
+    return UserLoggerAdapter(logger, {"user_id": user_id})
