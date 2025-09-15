@@ -1,7 +1,7 @@
 from src.domain.users import User, DomainValidationError
-from src.infrastructure.repository.user_repo import UserRepository
 from src.schemas.user_schema import UsersUpdate
 from src.domain.interfaces.iuser_repo import IUserRepository
+from src.core.config import get_user_logger
 
 class UserService:
     def __init__(self, repo: IUserRepository):
@@ -24,12 +24,12 @@ class UserService:
         return self.repo.get_user_by_name(full_name)
     
     def update_user(self, user_id: int, user_updated: UsersUpdate):
-        # Получаем существующего пользователя
+        # Check if user exists
         existing_user = self.repo.get_user(user_id)
         if not existing_user:
             return None
 
-        # Проверяем уникальность полей, если они обновляются
+        # Check for uniqueness constraints 
         if user_updated.full_name and user_updated.full_name != existing_user.full_name:
             if self.repo.get_user_by_name(user_updated.full_name):
                 raise DomainValidationError("The name is already taken")
@@ -42,7 +42,7 @@ class UserService:
             if self.repo.get_user_by_passport(user_updated.passport):
                 raise DomainValidationError("The passport is already taken")
 
-        # Обновляем только те поля, которые пришли в UsersUpdate
+        # Update only the provided fields that are not None
         updated_user = User(
             id=user_id,
             full_name=user_updated.full_name or existing_user.full_name,
