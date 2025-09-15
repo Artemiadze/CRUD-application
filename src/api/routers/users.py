@@ -7,7 +7,7 @@ from src.infrastructure.database import get_db
 from src.infrastructure.repository.user_repo import UserRepository
 from src.services.user_service import UserService
 from src.core.exceptions import DomainValidationError, DuplicateError, NotFoundError
-from src.core.config import get_user_logger, main_logger
+from src.core.logger import get_user_logger, main_logger
 
 # creating router
 router = APIRouter(prefix="/users", tags=["users"])

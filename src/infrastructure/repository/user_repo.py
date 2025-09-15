@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from src.domain.users import User
 from src.infrastructure.models.users import UserModel
 from src.domain.interfaces.iuser_repo import IUserRepository
-from src.core.config import main_logger
+from src.core.logger import main_logger
 
 class UserRepository(IUserRepository):
     def __init__(self, db: Session):

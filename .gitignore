@@ -14,5 +14,6 @@
 /tests/database
 .pytest_cache
 
+ServiceLogs.log
 venv/
 .vscode/
