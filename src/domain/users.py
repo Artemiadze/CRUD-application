@@ -1,11 +1,17 @@
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional
+from typing import NewType
+from uuid import UUID
+
+UserId = NewType("UserId", UUID)
 
 @dataclass
 class User:
-    id: Optional[int]
-    full_name: str
+    id: UserId
+    first_name: str
+    last_name: str
+    patronymic: str | None
     phone_number: str
     birth_date: date
-    passport: str
+    passport_series: int
+    passport_number: int

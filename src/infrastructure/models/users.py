@@ -5,7 +5,10 @@ class UserModel(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    full_name = Column(String, index=True)
+    first_name = Column(String, index=True)
+    last_name = Column(String, index=True)
+    patronymic = Column(String, index=True)
     phone_number = Column(String, index=True)
     birth_date = Column(Date)
-    passport = Column(String, unique=True)
+    passport_number = Column(Integer, unique=True)
+    passport_series = Column(Integer)
