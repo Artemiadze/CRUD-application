@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from src.domain.users import User
 from src.infrastructure.models.users import UserModel
 from src.domain.interfaces.iuser_repo import IUserRepository
-from src.core.config import logger
+from src.core.config import main_logger
 
 class UserRepository(IUserRepository):
     def __init__(self, db: Session):
@@ -18,52 +18,52 @@ class UserRepository(IUserRepository):
         )
 
     def create_user(self, user: User):
-        logger.debug(f"DB: inserting user {user.full_name}")
+        main_logger.debug(f"[UserRepository.create_user] DB: inserting user {user.full_name}")
         try:
             obj = UserModel(**user.__dict__)
             self.db.add(obj)
             self.db.commit()
             self.db.refresh(obj)
-            logger.info(f"DB: user created with id={obj.id}")
+            main_logger.info(f"[UserRepository.create_user] DB: user created with id={obj.id}")
             return self._to_domain(obj)
         except Exception as e:
-            logger.error(f"DB error while creating user {user.full_name}: {e}")
+            main_logger.error(f"[UserRepository.create_user] DB error while creating user {user.full_name}: {e}")
             self.db.rollback()
             raise
 
     def get_user(self, user_id: int):
-        logger.debug(f"DB: fetching user with id={user_id}")
+        main_logger.debug(f"[UserRepository.get_user] DB: fetching user with id={user_id}")
         obj = self.db.query(UserModel).filter(UserModel.id == user_id).first()
         if obj:
             return self._to_domain(obj)
         return None
 
     def get_user_by_name(self, full_name: str):
-        logger.debug(f"DB: fetching user with name={full_name}")
+        main_logger.debug(f"[UserRepository.get_user_by_name] DB: fetching user with name={full_name}")
         obj = self.db.query(UserModel).filter(UserModel.full_name == full_name).first()
         if obj:
             return self._to_domain(obj)
         return None
     
     def get_user_by_phone(self, phone_number: str):
-        logger.debug(f"DB: fetching user with phone_number={phone_number}")
+        main_logger.debug(f"[UserRepository.get_user_by_phone] DB: fetching user with phone_number={phone_number}")
         obj = self.db.query(UserModel).filter(UserModel.phone_number == phone_number).first()
         if obj:
             return self._to_domain(obj)
         return None
 
     def get_user_by_passport(self, passport: str):
-        logger.debug(f"DB: fetching user with passport={passport}")
+        main_logger.debug(f"[UserRepository.get_user_by_passport] DB: fetching user with passport={passport}")
         obj = self.db.query(UserModel).filter(UserModel.passport == passport).first()
         if obj:
             return self._to_domain(obj)
         return None
 
     def update(self, user: User) -> User:
-        logger.debug(f"DB: updating user id={user.id}")
+        main_logger.debug(f"[UserRepository.update] DB: updating user id={user.id}")
         obj = self.db.query(UserModel).filter(UserModel.id == user.id).first()
         if not obj:
-            logger.warning(f"DB: user with id={user.id} not found for update")
+            main_logger.warning(f"[UserRepository.update] DB: user with id={user.id} not found for update")
             return None
         
         # Update only provided fields
@@ -78,16 +78,16 @@ class UserRepository(IUserRepository):
 
         self.db.commit()
         self.db.refresh(obj)
-        logger.info(f"DB: user id={obj.id}, updated")
+        main_logger.info(f"[UserRepository.update] DB: user id={obj.id}, updated")
         return self._to_domain(obj)
 
     def delete_user(self, user_id: int):
-        logger.debug(f"DB: deleting user id={user_id}")
+        main_logger.debug(f"[UserRepository.delete_user] DB: deleting user id={user_id}")
         obj = self.db.query(UserModel).filter(UserModel.id == user_id).first()
         if not obj:
-            logger.warning(f"DB: user with id={user_id} not found for delete")
+            main_logger.warning(f"[UserRepository.delete_user] DB: user with id={user_id} not found for delete")
             return None
         self.db.delete(obj)
         self.db.commit()
-        logger.info(f"DB: user with id={user_id} deleted")
+        main_logger.info(f"[UserRepository.delete_user] DB: user with id={user_id} deleted")
         return True

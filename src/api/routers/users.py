@@ -7,7 +7,7 @@ from src.infrastructure.database import get_db
 from src.infrastructure.repository.user_repo import UserRepository
 from src.services.user_service import UserService
 from src.core.exceptions import DomainValidationError, DuplicateError, NotFoundError
-from src.core.config import get_user_logger
+from src.core.config import get_user_logger, main_logger
 
 # creating router
 router = APIRouter(prefix="/users", tags=["users"])
@@ -19,14 +19,14 @@ def create_user(user_in: UsersCreate, db: Session = Depends(get_db)):
     service = UserService(repo)
     
     logger = get_user_logger(user_id=None)
-    logger.info(f"POST /users - payload: {user_in.model_dump()}")
+    logger.info(f"[create_user] POST /users - payload: {user_in.model_dump()}")
 
     try:
         user = service.create_user(user_in)
         logger = get_user_logger(user_id=user.id)
-        logger.info(f"User created: {user.id}")
+        logger.info(f"[create_user] User created: {user.id}")
     except DomainValidationError as e:
-        logger.error(f"Validation error: {str(e)}")
+        logger.error(f"[create_user] Validation error: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
 
     return user
@@ -37,15 +37,16 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     repo = UserRepository(db)
     service = UserService(repo)
 
-    user = service.get_user(user_id)
     logger = get_user_logger(user_id=user_id)
-    logger.info(f"GET /users/id/{user_id} - fetched user: {user_id}")
+    logger.info(f"[get_user] GET /users/id/{user_id} - fetched user: {user_id}")
 
-    if not user:
-        logger.warning(f"User not found with ID: {user_id}")
+    try:
+        user = service.get_user(user_id)
+    except NotFoundError:
+        logger.warning(f"[get_user] User not found with ID: {user_id}")
         raise HTTPException(status_code=404, detail="User not found")
     
-    logger.info(f"User retrieved: {user.id}")
+    logger.info(f"[get_user] User retrieved: {user.id}")
     return user
 
 
@@ -54,15 +55,16 @@ def get_user_by_name(full_name: str, db: Session = Depends(get_db)):
     repo = UserRepository(db)
     service = UserService(repo)
 
-    user = service.get_user_by_name(full_name)
-    logger = get_user_logger(user_id=user.id if user else None)
-    logger.info(f"GET /users/by_name - fetched user by name: {full_name}")
 
-    if not user:
-        logger.warning(f"User not found with name: {full_name}")
+    main_logger.info(f"[get_user_by_name] GET /users/by_name - fetched user by name: {full_name}")
+
+    try:
+        user = service.get_user_by_name(full_name)
+    except NotFoundError:
+        main_logger.warning(f"[get_user_by_name] User not found with name: {full_name}")
         raise HTTPException(status_code=404, detail="User not found")
     
-    logger.info(f"User retrieved: {user.id}")
+    main_logger.info(f"[get_user_by_name] User retrieved: {user.id}")
     return user
 
 
@@ -70,30 +72,31 @@ def get_user_by_name(full_name: str, db: Session = Depends(get_db)):
 def update_user(user_id: int, user_updated: UsersUpdate, db: Session = Depends(get_db)):
     repo = UserRepository(db)
     service = UserService(repo)
+
     logger = get_user_logger(user_id=user_id)
-
-    existing_user = service.get_user(user_id)
-
-    # Create a new User instance with updated fields
-    updated_user = User(
-        id=user_id,
-        full_name=user_updated.full_name or existing_user.full_name,
-        phone_number=user_updated.phone_number or existing_user.phone_number,
-        birth_date=user_updated.birth_date or existing_user.birth_date,
-        passport=user_updated.passport or existing_user.passport,
-    )
+    logger.info(f"[update_user] PUT /users/{user_id} - update payload: {user_updated.model_dump()}")
 
     try:
+        existing_user = service.get_user(user_id)
+
+        # Create a new User instance with updated fields
+        updated_user = User(
+            id=user_id,
+            full_name=user_updated.full_name or existing_user.full_name,
+            phone_number=user_updated.phone_number or existing_user.phone_number,
+            birth_date=user_updated.birth_date or existing_user.birth_date,
+            passport=user_updated.passport or existing_user.passport,
+        )
+
         user = service.update_user(updated_user)
     except NotFoundError:
-        logger.warning(f"User not found with ID: {user_id}")
+        logger.warning(f"[update_user] User not found with ID: {user_id}")
         raise HTTPException(status_code=404, detail="User not found")
     except DuplicateError as e:
-        logger.warning(f"Duplicate error: {e}")
+        logger.warning(f"[update_user] Duplicate error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
-    logger.info(f"PUT /users/{user_id} - update payload: {user_updated.model_dump()}")
-    logger.info(f"User updated: {user.id}")
+    logger.info(f"[update_user] User updated: {user.id}")
 
     return user
 
@@ -103,13 +106,14 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     repo = UserRepository(db)
     service = UserService(repo)
 
-    ok = service.delete_user(user_id)
     logger = get_user_logger(user_id=user_id)
-    logger.info(f"DELETE /users/{user_id} - attempt to delete user")
+    logger.info(f"[delete_user] DELETE /users/{user_id} - attempt to delete user")
 
-    if not ok:
-        logger.warning(f"User not found with ID: {user_id}")
+    try:
+        service.delete_user(user_id)
+    except NotFoundError:
+        logger.warning(f"[delete_user] User not found with ID: {user_id}")
         raise HTTPException(status_code=404, detail="User not found")
 
-    logger.info(f"User deleted: {user_id}")
+    logger.info(f"[delete_user] User deleted: {user_id}")
     return {"detail": "User deleted successfully"}

@@ -31,7 +31,7 @@ def setup_logging():
     return logger
 
 
-logger = setup_logging()
+main_logger = setup_logging()
 
 settings = Settings()
 
@@ -41,4 +41,4 @@ def get_user_logger(user_id: int | None = None):
     Factory function to get a logger with user_id context.
     If user_id is None, it defaults to 'non'.
     """
-    return UserLoggerAdapter(logger, {"user_id": user_id})
+    return UserLoggerAdapter(main_logger, {"user_id": user_id})
