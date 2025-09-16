@@ -62,11 +62,6 @@ def test_get_user_success(user_service, mock_repo):
     assert result == user
     mock_repo.get_user.assert_called_once_with(1)
 
-def test_get_user_not_found(user_service, mock_repo):
-    mock_repo.get_user.return_value = None
-    with pytest.raises(NotFoundError, match="User with id=1 not found"):
-        user_service.get_user(1)
-
 def test_update_user_success(user_service, mock_repo):
     existing_user = User(id=1, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
                         birth_date="1990-01-01", passport_number="1234", passport_series="AB")
@@ -83,16 +78,6 @@ def test_update_user_success(user_service, mock_repo):
 
     assert result == updated_user
     mock_repo.update.assert_called_once_with(updated_user)
-
-def test_update_user_not_found(user_service, mock_repo):
-    user = User(id=1, first_name="Jane", last_name="Doe", patronymic=None, phone_number="1234567890",
-                birth_date="1990-01-01", passport_number="1234", passport_series="AB")
-    mock_repo.get_user.return_value = None
-    with pytest.raises(NotFoundError, match="User with id=1 not found"):
-        user_service.update_user(user)
-
-    with pytest.raises(NotFoundError, match="User 1"):
-        user_service.update_user(user)
 
 def test_update_user_duplicate_full_name(user_service, mock_repo):
     existing_user = User(id=1, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",

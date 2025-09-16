@@ -61,13 +61,28 @@ def test_get_user_by_full_name(user_repository, mock_db_session):
                            birth_date="1990-01-01", passport_number="1234", passport_series="AB")
     user_model2 = UserModel(id=2, first_name="John", last_name="Doe", patronymic="Smith", phone_number="0987654321",
                            birth_date="1990-01-02", passport_number="5678", passport_series="CD")
-    mock_query = mock_db_session.query.return_value
-    mock_query.filter.return_value.all.return_value = [user_model1, user_model2]
+    
+    # Mock the query chain for multiple filter calls
+    mock_query = Mock()
+    mock_db_session.query.return_value = mock_query
+    
+    mock_filter1 = Mock()  # First filter (first_name)
+    mock_query.filter.return_value = mock_filter1
+    
+    mock_filter2 = Mock()  # Second filter (last_name)
+    mock_filter1.filter.return_value = mock_filter2
+    
+    mock_filter3 = Mock()  # Third filter (patronymic)
+    mock_filter2.filter.return_value = mock_filter3
+    
+    mock_filter3.all.return_value = [user_model1, user_model2]
 
     result = user_repository.get_user_by_full_name(first_name="John", last_name="Doe", patronymic="Smith")
 
     assert len(result) == 2
     assert all(isinstance(user, User) for user in result)
+    assert result[0].id == 1
+    assert result[1].id == 2
 
 def test_get_user_by_phone_found(user_repository, mock_db_session):
     user_model = UserModel(id=1, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",

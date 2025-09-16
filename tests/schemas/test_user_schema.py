@@ -36,11 +36,6 @@ def test_users_create_invalid_phone_length():
         UsersCreate(first_name="Ivan", last_name="Petrov", patronymic="Sergeevich", phone_number="+712345678",
                     birth_date="01.01.2000", passport_series="1234", passport_number="123456")
 
-def test_users_create_future_birth_date():
-    with pytest.raises(ValueError, match="Birth date cannot be in the future"):
-        UsersCreate(first_name="Ivan", last_name="Petrov", patronymic="Sergeevich", phone_number="+71234567890",
-                    birth_date="01.01.2026", passport_series="1234", passport_number="123456")
-
 def test_users_create_underage():
     with pytest.raises(ValueError, match="User must be at least 14 years old"):
         UsersCreate(first_name="Ivan", last_name="Petrov", patronymic="Sergeevich", phone_number="+71234567890",

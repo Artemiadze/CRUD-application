@@ -68,7 +68,7 @@ class UserRepository(IUserRepository):
         return None
     
     def get_user_by_passport(self, series: str, number: str) -> User | None:
-        return (
+        obj = (
             self.db.query(UserModel)
             .filter(
                 UserModel.passport_series == series,
@@ -76,6 +76,7 @@ class UserRepository(IUserRepository):
             )
             .first()
         )
+        return self._to_domain(obj) if obj else None
 
     def get_user_by_passport_number(self, passport_number: str):
         main_logger.debug(f"[UserRepository.get_user_by_passport_number] DB: fetching user with passport={passport_number}")
