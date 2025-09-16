@@ -70,11 +70,11 @@ class UserService:
                 raise DuplicateError("phone_number", user.phone_number)
 
         if user.passport_number and user.passport_number != existing_user.passport_number:
-            if self.repo.get_user_by_passport(user.passport_number):
+            if self.repo.get_user_by_passport_number(user.passport_number):
                 raise DuplicateError("passport_number", user.passport_number)
             
         if user.passport_series and user.passport_series != existing_user.passport_series:
-            if self.repo.get_user_by_passport(user.passport_series):
+            if self.repo.get_user_by_passport_series(user.passport_series):
                 raise DuplicateError("passport_series", user.passport_series)
 
         return self.repo.update(user)

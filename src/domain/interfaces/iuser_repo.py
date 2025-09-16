@@ -22,9 +22,9 @@ class IUserRepository(ABC):
     @abstractmethod
     def get_user_by_passport(
         self, passport_series: str, passport_number: str
-    ) -> User | None:
+    ) -> Optional[User] | None:
         pass
-    
+
     @abstractmethod
     def get_user_by_passport_number(self, passport_number: str) -> Optional[User]:
         pass
