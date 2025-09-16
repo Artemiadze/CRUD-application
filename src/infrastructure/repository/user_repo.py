@@ -11,14 +11,17 @@ class UserRepository(IUserRepository):
     def _to_domain(self, obj: UserModel) -> User:
         return User(
             id=obj.id,
-            full_name=obj.full_name,
+            first_name=obj.first_name,
+            last_name=obj.last_name,
+            patronymic=obj.patronymic,
             phone_number=obj.phone_number,
             birth_date=obj.birth_date,
-            passport=obj.passport
+            passport_number=obj.passport_number,
+            passport_series=obj.passport_series
         )
 
     def create_user(self, user: User):
-        main_logger.debug(f"[UserRepository.create_user] DB: inserting user {user.full_name}")
+        main_logger.debug(f"[UserRepository.create_user] DB: inserting user {user.first_name + user.last_name + user.patronymic}")
         try:
             obj = UserModel(**user.__dict__)
             self.db.add(obj)
@@ -27,7 +30,8 @@ class UserRepository(IUserRepository):
             main_logger.info(f"[UserRepository.create_user] DB: user created with id={obj.id}")
             return self._to_domain(obj)
         except Exception as e:
-            main_logger.error(f"[UserRepository.create_user] DB error while creating user {user.full_name}: {e}")
+            main_logger.error(f"[UserRepository.create_user] DB error while creating user {user.first_name 
+                                                                                           + user.last_name + user.patronymic}: {e}")
             self.db.rollback()
             raise
 
@@ -38,12 +42,22 @@ class UserRepository(IUserRepository):
             return self._to_domain(obj)
         return None
 
-    def get_user_by_name(self, full_name: str):
-        main_logger.debug(f"[UserRepository.get_user_by_name] DB: fetching user with name={full_name}")
-        obj = self.db.query(UserModel).filter(UserModel.full_name == full_name).first()
-        if obj:
-            return self._to_domain(obj)
-        return None
+    def get_user_by_full_name(self, first_name: str | None = None,
+        last_name: str | None = None,
+        patronymic: str | None = None,):
+
+        main_logger.debug(f"[UserRepository.get_user_by_name] DB: fetching user with name={first_name, last_name, patronymic}")
+        query = self.db.query(UserModel)
+
+        if first_name:
+            query = query.filter(UserModel.first_name == first_name)
+        if last_name:
+            query = query.filter(UserModel.last_name == last_name)
+        if patronymic:
+            query = query.filter(UserModel.patronymic == patronymic)
+
+        objs = query.all()
+        return [self._to_domain(obj) for obj in objs]
     
     def get_user_by_phone(self, phone_number: str):
         main_logger.debug(f"[UserRepository.get_user_by_phone] DB: fetching user with phone_number={phone_number}")
@@ -52,9 +66,16 @@ class UserRepository(IUserRepository):
             return self._to_domain(obj)
         return None
 
-    def get_user_by_passport(self, passport: str):
-        main_logger.debug(f"[UserRepository.get_user_by_passport] DB: fetching user with passport={passport}")
-        obj = self.db.query(UserModel).filter(UserModel.passport == passport).first()
+    def get_user_by_passport_number(self, passport_number: str):
+        main_logger.debug(f"[UserRepository.get_user_by_passport_number] DB: fetching user with passport={passport_number}")
+        obj = self.db.query(UserModel).filter(UserModel.passport_number == passport_number).first()
+        if obj:
+            return self._to_domain(obj)
+        return None
+    
+    def get_user_by_passport_series(self, passport_series: str):
+        main_logger.debug(f"[UserRepository.get_user_by_passport_series] DB: fetching user with passport={passport_series}")
+        obj = self.db.query(UserModel).filter(UserModel.passport_series == passport_series).first()
         if obj:
             return self._to_domain(obj)
         return None
@@ -67,14 +88,20 @@ class UserRepository(IUserRepository):
             return None
         
         # Update only provided fields
-        if user.full_name is not None:
-            obj.full_name = user.full_name
+        if user.first_name is not None:
+            obj.first_name = user.first_name
+        if user.last_name is not None:
+            obj.last_name = user.last_name
+        if user.patronymic is not None:
+            obj.patronymic = user.patronymic
         if user.phone_number is not None:
             obj.phone_number = user.phone_number
         if user.birth_date is not None:
             obj.birth_date = user.birth_date
-        if user.passport is not None:
-            obj.passport = user.passport
+        if user.passport_number is not None:
+            obj.passport_number = user.passport_number
+        if user.passport_series is not None:
+            obj.passport_series = user.passport_series
 
         self.db.commit()
         self.db.refresh(obj)
