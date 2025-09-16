@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from typing import List
 
 from src.domain.users import User
 from src.schemas.user_schema import UsersCreate, UsersOut, UsersUpdate
@@ -50,7 +51,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     return user
 
 
-@router.get("/find", response_model=UsersOut)
+@router.get("/find", response_model=List[UsersOut])
 def get_user_by_full_name(first_name: str | None = Query(None),
     last_name: str | None = Query(None),
     patronymic: str | None = Query(None),
@@ -68,7 +69,7 @@ def get_user_by_full_name(first_name: str | None = Query(None),
         main_logger.warning(f"[get_user_by_full_name] User not found with name: {log_message.strip()}")
         raise HTTPException(status_code=404, detail="User not found")
     
-    main_logger.info(f"[get_user_by_full_name] User retrieved: {user.id}")
+    main_logger.info(f"[get_user_by_full_name] User retrieved: {log_message.strip()}")
     return user
 
 

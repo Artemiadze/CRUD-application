@@ -37,9 +37,12 @@ http://127.0.0.1:8000/docs
 6. For example, enter in request body in the field 'POST: Create User':
 ```json
 {
-  "full_name": "Иванов Иван Петрович",
-  "phone_number": "+79995553322",
-  "birth_date": "1984-01-01",
-  "passport": "4321 987654"
+  "first_name": "Abe",
+  "last_name": "Who",
+  "patronymic": "Bea",
+  "phone_number": "89307146514",
+  "birth_date": "2005-09-16",
+  "passport_series": "2222",
+  "passport_number": "077777"
 }
 ```
