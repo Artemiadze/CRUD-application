@@ -11,8 +11,8 @@ class UsersBase(BaseModel):
     patronymic: str | None
     phone_number: str
     birth_date: date
-    passport_series: int
-    passport_number: int
+    passport_series: str
+    passport_number: str
 
     @field_validator('first_name', mode='before')
     def validate_first_name(cls, value):
@@ -70,59 +70,57 @@ class UsersBase(BaseModel):
     
     @field_validator('birth_date', mode='before')
     def validate_birth_date(cls, value):
-        if value is None or not value.strip():
+        if value is None:
             raise ValueError('Birth date cannot be None')
-        
-        # List of acceptable date formats
-        date_formats = [
-            '%Y-%m-%d',  # 2000-01-01
-            '%d.%m.%Y',  # 01.01.2000
-            '%d/%m/%Y',  # 01/01/2000
-            '%d-%m-%Y',  # 01-01-2000
-            '%Y.%m.%d',  # 2000.01.01
-            '%Y/%m/%d',  # 2000/01/01
-        ]
-        
+
+        # If it's already a date object, just return it after checking it's not in the future
+        if isinstance(value, date):
+            if value > date.today():
+                raise ValueError('Birth date cannot be in the future')
+            return value
+
         if isinstance(value, str):
             value = value.strip()
             if not value:
                 raise ValueError('Birth date cannot be empty')
-            
+
             # Check for invalid characters
-            if not re.match(r'^[\d\s.-/]+$', value):
+            if not re.fullmatch(r'[\d.\-\/ ]+', value):
                 raise ValueError('Birth date contains invalid characters')
-            
-            # Try to parse the date using the acceptable formats
-            parsed_date = None
+
+            # Formats to try parsing the date
+            date_formats = [
+                '%Y-%m-%d',  # 2000-01-01
+                '%d.%m.%Y',  # 01.01.2000
+                '%d/%m/%Y',  # 01/01/2000
+                '%d-%m-%Y',  # 01-01-2000
+                '%Y.%m.%d',  # 2000.01.01
+                '%Y/%m/%d',  # 2000/01/01
+            ]
+
             for fmt in date_formats:
                 try:
-                    parsed_date = datetime.strptime(value, fmt).date()
-                    break
+                    parsed = datetime.strptime(value, fmt).date()
+                    if parsed > date.today():
+                        raise ValueError('Birth date cannot be in the future')
+                    return parsed
                 except ValueError:
-                    # continue trying other formats
                     continue
-            
-            if parsed_date is None:
-                raise ValueError('Birth date must be in one of the formats: YYYY-MM-DD, DD.MM.YYYY, DD/MM/YYYY, DD-MM-YYYY, YYYY.MM.DD, YYYY/MM/DD')
-            
-            value = parsed_date
-        
-        elif not isinstance(value, date):
-            raise ValueError('Birth date must be a valid date object')
-        
-        # Is date in the future?
-        if value > date.today():
-            raise ValueError('Birth date cannot be in the future')
-        
-        return value
+
+            raise ValueError(
+                'Birth date must be in one of the formats: '
+                'YYYY-MM-DD, DD.MM.YYYY, DD/MM/YYYY, DD-MM-YYYY, YYYY.MM.DD, YYYY/MM/DD'
+            )
+
+        raise ValueError('Birth date must be a valid date or string')
     
     @field_validator('passport_series', mode='before')
     def validate_passport_series(cls, value):
-        if value is None or not value.strip():
+        if value is None:
             raise ValueError('passport_series cannot be empty or None')
         
         # Removing leading and trailing whitespace
-        value = value.strip()
+        value = str(value).strip()
 
         if not isinstance(value, str):
             raise ValueError('passport_series must be a string')
@@ -132,19 +130,16 @@ class UsersBase(BaseModel):
         
         if not re.match(r'^[1-9][0-9]{3}$', value):
             raise ValueError('passport_series must contain only digits and cannot start with zero')
-
-        if not re.match(r'^[0-9]+$', value):
-            raise ValueError('passport_series must contain only alphanumeric characters and spaces')
         
         return value.upper()
     
     @field_validator('passport_number', mode='before')
     def validate_passport_number(cls, value):
-        if value is None or not value.strip():
+        if value is None:
             raise ValueError('passport_number cannot be empty or None')
         
         # Removing leading and trailing whitespace
-        value = value.strip()
+        value = str(value).strip()
         
         if not isinstance(value, str):
             raise ValueError('passport_number must be a string')
@@ -284,11 +279,11 @@ class UsersUpdate(UsersBase):
     
     @field_validator('passport_series', mode='before')
     def validate_passport_series(cls, value):
-        if value is None or value.strip():
+        if value is None:
             return value
         
         # Removing leading and trailing whitespace
-        value = value.strip()
+        value = str(value).strip()
 
         if not isinstance(value, str):
             raise ValueError('passport_series must be a string')
@@ -298,19 +293,16 @@ class UsersUpdate(UsersBase):
         
         if not re.match(r'^[1-9][0-9]{3}$', value):
             raise ValueError('passport_series must contain only digits and cannot start with zero')
-
-        if not re.match(r'^[0-9]+$', value):
-            raise ValueError('passport_series must contain only alphanumeric characters and spaces')
         
         return value.upper()
     
     @field_validator('passport_number', mode='before')
     def validate_passport_number(cls, value):
-        if value is None or value.strip():
+        if value is None:
             return value  # Skip it if the field is not provided.
         
         # Removing leading and trailing whitespace
-        value = value.strip()
+        value = str(value).strip()
         
         if not isinstance(value, str):
             raise ValueError('passport_number must be a string')

@@ -18,9 +18,19 @@ class IUserRepository(ABC):
     @abstractmethod
     def get_user_by_phone(self, phone_number: str) -> Optional[User]:
         pass
+    
+    @abstractmethod
+    def get_user_by_passport(
+        self, passport_series: str, passport_number: str
+    ) -> User | None:
+        pass
+    
+    @abstractmethod
+    def get_user_by_passport_number(self, passport_number: str) -> Optional[User]:
+        pass
 
     @abstractmethod
-    def get_user_by_passport(self, passport: str) -> Optional[User]:
+    def get_user_by_passport_series(self, passport_series: str) -> Optional[User]:
         pass
 
     @abstractmethod

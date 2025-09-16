@@ -10,5 +10,5 @@ class UserModel(Base):
     patronymic = Column(String, index=True)
     phone_number = Column(String, index=True)
     birth_date = Column(Date)
-    passport_number = Column(Integer, unique=True)
-    passport_series = Column(Integer)
+    passport_number = Column(String(6), nullable=False, unique=True)
+    passport_series = Column(String(4), nullable=False)

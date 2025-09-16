@@ -7,17 +7,25 @@ class UserService:
         self.repo = repo
 
     def create_user(self, user: User):
+        # Check for duplicate full name
         if self.repo.get_user_by_full_name(
             user.first_name, user.last_name, user.patronymic
         ):
             raise DuplicateError(
                 "full_name",
-                f"{user.last_name} {user.first_name} {user.patronymic}"
+                f"{user.last_name} {user.first_name} {user.patronymic or ''}".strip()
             )
+
+        # Check for duplicate phone number
         if self.repo.get_user_by_phone(user.phone_number):
             raise DuplicateError("phone_number", user.phone_number)
-        if self.repo.get_user_by_passport(user.passport):
-            raise DuplicateError("passport", user.passport)
+
+        # Check for duplicate passport
+        if self.repo.get_user_by_passport(user.passport_series, user.passport_number):
+            raise DuplicateError(
+                "passport",
+                f"{user.passport_series} {user.passport_number}"
+            )
         
         return self.repo.create_user(user)
     
