@@ -40,9 +40,9 @@ http://127.0.0.1:8000/docs
   "first_name": "Abe",
   "last_name": "Who",
   "patronymic": "Bea",
-  "phone_number": "89307146514",
-  "birth_date": "2005-09-16",
-  "passport_series": "2222",
+  "phone_number": "89204001940",
+  "birth_date": "1995-09-16",
+  "passport_series": "3333",
   "passport_number": "077777"
 }
 ```
