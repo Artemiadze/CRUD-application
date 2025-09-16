@@ -21,7 +21,8 @@ class UserRepository(IUserRepository):
         )
 
     def create_user(self, user: User):
-        main_logger.debug(f"[UserRepository.create_user] DB: inserting user {user.first_name + user.last_name + user.patronymic}")
+        log_message = str(user.first_name) + ", " + str(user.last_name) + ", " + str(user.patronymic)
+        main_logger.debug(f"[UserRepository.create_user] DB: inserting user {log_message}")
         try:
             obj = UserModel(**user.__dict__)
             self.db.add(obj)
@@ -30,8 +31,7 @@ class UserRepository(IUserRepository):
             main_logger.info(f"[UserRepository.create_user] DB: user created with id={obj.id}")
             return self._to_domain(obj)
         except Exception as e:
-            main_logger.error(f"[UserRepository.create_user] DB error while creating user {user.first_name 
-                                                                                           + user.last_name + user.patronymic}: {e}")
+            main_logger.error(f"[UserRepository.create_user] DB error while creating user {log_message.strip()}: {e}")
             self.db.rollback()
             raise
 
@@ -46,7 +46,8 @@ class UserRepository(IUserRepository):
         last_name: str | None = None,
         patronymic: str | None = None,):
 
-        main_logger.debug(f"[UserRepository.get_user_by_name] DB: fetching user with name={first_name, last_name, patronymic}")
+        log_message = str(first_name) + ", " + str(last_name) + ", " + str(patronymic)
+        main_logger.debug(f"[UserRepository.get_user_by_name] DB: fetching user with name={log_message.strip()}")
         query = self.db.query(UserModel)
 
         if first_name:
