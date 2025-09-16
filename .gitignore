@@ -12,6 +12,12 @@
 
 /tests/__pycache__
 /tests/database
+/tests/api/routers/__pycache__
+/tests/infrastructure/__pycache__
+/tests/infrastructure/repository/__pycache__
+/tests/domain/interfaces/__pycache__
+/tests/schemas/__pycache__
+/tests/services/__pycache__
 .pytest_cache
 
 ServiceLogs.log
