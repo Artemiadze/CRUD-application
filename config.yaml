@@ -7,8 +7,11 @@ database:
   engine: sqlite
   name: mydb.db
   tables:
-    users:
-      file: users.db
+    users: 
+      primary_key: id 
+    passport:
+      primary_key: id 
+
 
 logging:
   file_name: app.log

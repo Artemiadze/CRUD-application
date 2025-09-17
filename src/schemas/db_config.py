@@ -1,10 +1,9 @@
-from pathlib import Path
 from pydantic import BaseModel
+from pathlib import Path
 from typing import Dict
 
-
 class TableConfig(BaseModel):
-    file: str
+    primary_key: str = "id"
 
 class DatabaseConfig(BaseModel):
     engine: str
@@ -15,4 +14,6 @@ class DatabaseConfig(BaseModel):
         table = self.tables.get(table_name)
         if table is None:
             raise ValueError(f"Table {table_name} not found in config")
-        return base_dir / table.file
+        
+        # Construct the full path to the database file
+        return base_dir / self.name
