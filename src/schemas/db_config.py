@@ -1,0 +1,18 @@
+from pathlib import Path
+from pydantic import BaseModel
+from typing import Dict
+
+
+class TableConfig(BaseModel):
+    file: str
+
+class DatabaseConfig(BaseModel):
+    engine: str
+    name: str
+    tables: Dict[str, TableConfig]
+
+    def get_table_path(self, table_name: str, base_dir: Path) -> Path:
+        table = self.tables.get(table_name)
+        if table is None:
+            raise ValueError(f"Table {table_name} not found in config")
+        return base_dir / table.file

@@ -9,7 +9,6 @@ database:
   tables:
     users:
       file: users.db
-      primary_key: id
 
 logging:
   file_name: app.log
