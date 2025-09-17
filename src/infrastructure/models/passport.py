@@ -1,4 +1,6 @@
 from sqlalchemy import  Column, String, Date
+from sqlalchemy import ForeignKey
+
 from uuid import uuid4
 
 from src.infrastructure.database import Base
@@ -12,4 +14,4 @@ class PassportModel(Base):
     passport_number = Column(String(6), nullable=False, unique=True)
     passport_series = Column(String(4), nullable=False)
     receipt_date = Column(Date)
-    user_id = Column(String, foreign_key="users.id", nullable=False)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
