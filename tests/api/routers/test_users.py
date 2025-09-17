@@ -1,10 +1,11 @@
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch
+import uuid
 
 from src.core.exceptions import NotFoundError
 from src.api.routers.users import router
-from src.schemas.user_schema import UsersUpdate, UsersOut
+from src.schemas.user_schema import UsersUpdate
 from src.domain.users import User
 
 from fastapi import FastAPI
@@ -15,8 +16,10 @@ app.include_router(router)
 client = TestClient(app)
 
 # Тестовые данные
+test_uuid = str(uuid.uuid4())
+
 test_user_data = {
-    "id": 1,
+    "id": test_uuid,
     "first_name": "Ivan",
     "last_name": "Ivanov",
     "patronymic": "Petrovich",
@@ -58,15 +61,16 @@ def test_create_user(mock_user_service, mock_db):
 """
 
 def test_get_user(mock_user_service, mock_db):
-    response = client.get("/users/id/1")
+    response = client.get(f"/id/{test_uuid}")
     assert response.status_code == 200
     data = response.json()
-    assert data["id"] == 1
-    mock_user_service.get_user.assert_called_once_with(1)
+    assert str(data["id"]) == str(test_uuid)
+    mock_user_service.get_user.assert_called_once_with(str(test_uuid))
 
 def test_get_user_not_found(mock_user_service, mock_db):
-    mock_user_service.get_user.side_effect = NotFoundError("User", 999)
-    response = client.get("/users/id/999")
+    not_found_uuid = str(uuid.uuid4())
+    mock_user_service.get_user.side_effect = NotFoundError("User", not_found_uuid)
+    response = client.get(f"/users/id/{not_found_uuid}")
     assert response.status_code == 404
 
 def test_get_user_by_full_name(mock_user_service, mock_db):
@@ -77,15 +81,15 @@ def test_get_user_by_full_name(mock_user_service, mock_db):
     assert data[0]["first_name"] == "Ivan"
 
 def test_update_user(mock_user_service, mock_db):
-    response = client.put("/users/1", json=test_user_update.model_dump())
+    response = client.put(f"/users/{test_uuid}", json=test_user_update.model_dump())
     assert response.status_code == 200
     data = response.json()
     assert data["first_name"] == "Petr"
     mock_user_service.update_user.assert_called_once()
 
 def test_delete_user(mock_user_service, mock_db):
-    response = client.delete("/users/1")
+    response = client.delete(f"/{test_uuid}")
     assert response.status_code == 200
     data = response.json()
     assert data["detail"] == "User deleted successfully"
-    mock_user_service.delete_user.assert_called_once_with(1)
+    mock_user_service.delete_user.assert_called_once_with(str(test_uuid))

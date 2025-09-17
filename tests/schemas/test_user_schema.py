@@ -1,6 +1,10 @@
 import pytest
 from datetime import date
+import uuid
+
 from src.schemas.user_schema import UsersCreate, UsersUpdate, UsersOut
+
+test_uuid = str(uuid.uuid4())
 
 def test_users_create_valid_data():
     data = {
@@ -72,7 +76,7 @@ def test_users_update_invalid_phone_number():
 
 def test_users_out_valid_data():
     data = {
-        "id": 1,
+        "id": str(test_uuid),
         "first_name": "ivan",
         "last_name": "petrov",
         "patronymic": "sergeevich",
@@ -82,7 +86,7 @@ def test_users_out_valid_data():
         "passport_number": "123456"
     }
     user = UsersOut(**data)
-    assert user.id == 1
+    assert user.id == uuid.UUID(test_uuid)
     assert user.first_name == "Ivan"
     assert user.last_name == "Petrov"
     assert user.patronymic == "Sergeevich"

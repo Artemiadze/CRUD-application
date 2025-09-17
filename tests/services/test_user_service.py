@@ -1,8 +1,12 @@
 import pytest
+import uuid
 from unittest.mock import Mock
+
 from src.domain.users import User
 from src.core.exceptions import DuplicateError, NotFoundError
 from src.services.user_service import UserService
+
+test_uuid = str(uuid.uuid4())
 
 @pytest.fixture
 def mock_repo():
@@ -13,7 +17,7 @@ def user_service(mock_repo):
     return UserService(repo=mock_repo)
 
 def test_create_user_success(user_service, mock_repo):
-    user = User(id=1, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
+    user = User(id=test_uuid, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
                 birth_date="1990-01-01", passport_number="1234", passport_series="AB")
     mock_repo.get_user_by_full_name.return_value = []
     mock_repo.get_user_by_phone.return_value = None
@@ -26,7 +30,7 @@ def test_create_user_success(user_service, mock_repo):
     mock_repo.create_user.assert_called_once_with(user)
 
 def test_create_user_duplicate_full_name(user_service, mock_repo):
-    user = User(id=1, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
+    user = User(id=test_uuid, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
                 birth_date="1990-01-01", passport_number="1234", passport_series="AB")
     mock_repo.get_user_by_full_name.return_value = [user]
 
@@ -34,7 +38,7 @@ def test_create_user_duplicate_full_name(user_service, mock_repo):
         user_service.create_user(user)
 
 def test_create_user_duplicate_phone(user_service, mock_repo):
-    user = User(id=1, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
+    user = User(id=test_uuid, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
                 birth_date="1990-01-01", passport_number="1234", passport_series="AB")
     mock_repo.get_user_by_full_name.return_value = []
     mock_repo.get_user_by_phone.return_value = user
@@ -43,7 +47,7 @@ def test_create_user_duplicate_phone(user_service, mock_repo):
         user_service.create_user(user)
 
 def test_create_user_duplicate_passport(user_service, mock_repo):
-    user = User(id=1, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
+    user = User(id=test_uuid, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
                 birth_date="1990-01-01", passport_number="1234", passport_series="AB")
     mock_repo.get_user_by_full_name.return_value = []
     mock_repo.get_user_by_phone.return_value = None
@@ -53,19 +57,19 @@ def test_create_user_duplicate_passport(user_service, mock_repo):
         user_service.create_user(user)
 
 def test_get_user_success(user_service, mock_repo):
-    user = User(id=1, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
+    user = User(id=test_uuid, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
                 birth_date="1990-01-01", passport_number="1234", passport_series="AB")
     mock_repo.get_user.return_value = user
 
-    result = user_service.get_user(1)
+    result = user_service.get_user(test_uuid)
 
     assert result == user
-    mock_repo.get_user.assert_called_once_with(1)
+    mock_repo.get_user.assert_called_once_with(test_uuid)
 
 def test_update_user_success(user_service, mock_repo):
-    existing_user = User(id=1, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
+    existing_user = User(id=test_uuid, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
                         birth_date="1990-01-01", passport_number="1234", passport_series="AB")
-    updated_user = User(id=1, first_name="Jane", last_name="Doe", patronymic=None, phone_number="1234567890",
+    updated_user = User(id=test_uuid, first_name="Jane", last_name="Doe", patronymic=None, phone_number="1234567890",
                         birth_date="1990-01-01", passport_number="1234", passport_series="AB")
     mock_repo.get_user.return_value = existing_user
     mock_repo.get_user_by_full_name.return_value = []
@@ -82,9 +86,9 @@ def test_update_user_success(user_service, mock_repo):
 
 
 def test_update_user_duplicate_full_name(user_service, mock_repo):
-    existing_user = User(id=1, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
+    existing_user = User(id=test_uuid, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
                         birth_date="1990-01-01", passport_number="1234", passport_series="AB")
-    updated_user = User(id=1, first_name="Jane", last_name="Doe", patronymic="Smith", phone_number="1234567890",
+    updated_user = User(id=test_uuid, first_name="Jane", last_name="Doe", patronymic="Smith", phone_number="1234567890",
                         birth_date="1990-01-01", passport_number="1234", passport_series="AB")
     mock_repo.get_user.return_value = existing_user
     mock_repo.get_user_by_full_name.return_value = [updated_user]
@@ -93,17 +97,17 @@ def test_update_user_duplicate_full_name(user_service, mock_repo):
         user_service.update_user(updated_user)
 
 def test_delete_user_success(user_service, mock_repo):
-    user = User(id=1, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
+    user = User(id=test_uuid, first_name="John", last_name="Doe", patronymic="Smith", phone_number="1234567890",
                 birth_date="1990-01-01", passport_number="1234", passport_series="AB")
     mock_repo.get_user.return_value = user
     mock_repo.delete_user.return_value = True
 
-    result = user_service.delete_user(1)
+    result = user_service.delete_user(test_uuid)
 
     assert result is True
-    mock_repo.delete_user.assert_called_once_with(1)
+    mock_repo.delete_user.assert_called_once_with(test_uuid)
 
 def test_delete_user_not_found(user_service, mock_repo):
     mock_repo.get_user.return_value = None
-    with pytest.raises(NotFoundError, match="User with id=1 not found"):
-        user_service.delete_user(1)
+    with pytest.raises(NotFoundError, match=f"User with id={test_uuid} not found"):
+        user_service.delete_user(test_uuid)
