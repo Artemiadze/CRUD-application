@@ -10,6 +10,10 @@ class DatabaseConfig(BaseModel):
     name: str
     tables: Dict[str, TableConfig]
 
+    @property
+    def path(self) -> Path:
+        return Path("./src/database") / self.name
+
     def get_table_path(self, table_name: str, base_dir: Path) -> Path:
         table = self.tables.get(table_name)
         if table is None:
