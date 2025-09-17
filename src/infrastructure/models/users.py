@@ -1,4 +1,5 @@
 from sqlalchemy import  Column, String
+from sqlalchemy.orm import relationship
 from uuid import uuid4
 
 from src.infrastructure.database import Base
@@ -12,3 +13,5 @@ class UserModel(Base):
     last_name = Column(String, index=True)
     patronymic = Column(String, index=True)
     phone_number = Column(String, index=True)
+
+    passports = relationship("PassportModel", back_populates="user", cascade="all, delete-orphan")
