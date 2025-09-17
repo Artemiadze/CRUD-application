@@ -1,0 +1,18 @@
+env: dev
+project_name: crud_app
+paths:
+  database_dir: ./src/database
+
+database:
+  engine: sqlite
+  name: mydb.db
+  tables:
+    users:
+      file: users.db
+      primary_key: id
+
+logging:
+  file_name: app.log
+  file_level: DEBUG
+  console_level: INFO
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
