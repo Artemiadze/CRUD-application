@@ -20,6 +20,6 @@
 /tests/services/__pycache__
 .pytest_cache
 
-ServiceLogs.log
+app.log
 venv/
 .vscode/

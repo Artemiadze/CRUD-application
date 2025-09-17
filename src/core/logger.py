@@ -1,5 +1,6 @@
 import logging
 from typing import Optional
+from src.core.config import configs
 
 class UserLoggerAdapter(logging.LoggerAdapter):
     """
@@ -23,17 +24,17 @@ def setup_logging() -> logging.Logger:
     
     # Avoid adding handlers multiple times
     if not logger.handlers:
-        formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+        formatter = logging.Formatter(configs.logging.format)
         
         # File handler (DEBUG and above) (mode='w' to overwrite on each run)
-        file_handler = logging.FileHandler("ServiceLogs.log", mode='w')
-        file_handler.setLevel(logging.DEBUG)
+        file_handler = logging.FileHandler(configs.logging.file_name, mode='w')
+        file_handler.setLevel(configs.logging.file_level)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
         
         # Console handler (INFO and above)
         stream_handler = logging.StreamHandler()
-        stream_handler.setLevel(logging.INFO)
+        stream_handler.setLevel(configs.logging.console_level)
         stream_handler.setFormatter(formatter)
         logger.addHandler(stream_handler)
     

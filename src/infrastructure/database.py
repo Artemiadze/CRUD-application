@@ -1,11 +1,14 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from src.core.config import settings
+from src.core.config import configs
 
 # creating an engine for work with SQLAlchemy 
+db_file = configs.database.get_table_path("users", configs.paths.database_dir)
+DATABASE_URL = f"sqlite:///{db_file}"
+
 engine = create_engine(
-    settings.DATABASE_URL, connect_args={"check_same_thread": False}
+    DATABASE_URL, connect_args={"check_same_thread": False}
 )
 
 # creating a configured "Session" class
