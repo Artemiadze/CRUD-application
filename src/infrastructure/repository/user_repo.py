@@ -44,7 +44,7 @@ class UserRepository(IUserRepository):
 
     def get_user_by_full_name(self, first_name: str | None = None,
         last_name: str | None = None,
-        patronymic: str | None = None,):
+        patronymic: str | None = None):
 
         log_message = str(first_name) + ", " + str(last_name) + ", " + str(patronymic)
         main_logger.debug(f"[UserRepository.get_user_by_name] DB: fetching user with name={log_message.strip()}")

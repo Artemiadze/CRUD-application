@@ -12,7 +12,9 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    def get_user_by_full_name(self, full_name: str) -> Optional[User]:
+    def get_user_by_full_name(self, first_name: str | None = None,
+        last_name: str | None = None,
+        patronymic: str | None = None) -> Optional[User]:
         pass
 
     @abstractmethod
