@@ -1,4 +1,4 @@
-from sqlalchemy import  Column, String, Date
+from sqlalchemy import  Column, String
 from uuid import uuid4
 
 from src.infrastructure.database import Base
@@ -12,6 +12,3 @@ class UserModel(Base):
     last_name = Column(String, index=True)
     patronymic = Column(String, index=True)
     phone_number = Column(String, index=True)
-    birth_date = Column(Date)
-    passport_number = Column(String(6), nullable=False, unique=True)
-    passport_series = Column(String(4), nullable=False)

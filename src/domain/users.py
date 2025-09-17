@@ -12,6 +12,3 @@ class User:
     last_name: str
     patronymic: str | None
     phone_number: str
-    birth_date: date
-    passport_series: str
-    passport_number: str
