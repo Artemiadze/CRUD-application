@@ -12,14 +12,6 @@ class IPassportRepository(ABC):
         pass
 
     @abstractmethod
-    def get_passport_by_number(self, passport_number: str) -> Optional[Passport]:
-        pass
-
-    @abstractmethod
-    def get_passport_by_series(self, passport_series: str) -> Optional[Passport]:
-        pass
-
-    @abstractmethod
     def get_passport_by_series_and_number(self, series: str, number: str) -> Optional[Passport]:
         pass
 

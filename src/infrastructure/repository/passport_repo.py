@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import and_
 import uuid
 
 from src.domain.passport import Passport, PassportID
@@ -26,14 +27,8 @@ class PassportRepository(IPassportRepository):
         logger.debug(f"[PassportRepository.create_passport] DB: inserting passport {log_message}")
 
         try:
-            db_passport = PassportModel(
-                id=str(passport.id),  # Store UUID as string in DB
-                birth_date=passport.birth_date,
-                passport_number=passport.passport_number,
-                passport_series=passport.passport_series,
-                receipt_date=passport.receipt_date,
-                user_id=str(passport.user_id)  # Store UUID as string in DB
-            )
+            db_obj = {key: value for key, value in passport.__dict__.items() if key != 'id' or value is not None}
+            db_passport = PassportModel(**db_obj)
             self.db.add(db_passport)
             self.db.commit()
             self.db.refresh(db_passport)
@@ -49,25 +44,7 @@ class PassportRepository(IPassportRepository):
         logger = get_user_logger()
         logger.debug(f"[PassportRepository.get_passport] DB: fetching passport with id={str_id}")
 
-        db_passport = self.db.query(PassportModel).filter(PassportModel.id == str(str_id)).first()
-        if db_passport:
-            return self._to_domain(str_id)
-        return None
-    
-    def get_passport_by_number(self, passport_number: str) -> Passport | None:
-        logger = get_user_logger()
-        logger.debug(f"[PassportRepository.get_passport_by_number] DB: fetching passport with number={passport_number}")
-
-        db_passport = self.db.query(PassportModel).filter(PassportModel.passport_number == passport_number).first()
-        if db_passport:
-            return self._to_domain(db_passport)
-        return None
-    
-    def get_passport_by_series(self, passport_series: str) -> Passport | None:
-        logger = get_user_logger()
-        logger.debug(f"[PassportRepository.get_passport_by_series] DB: fetching passport with series={passport_series}")
-
-        db_passport = self.db.query(PassportModel).filter(PassportModel.passport_series == passport_series).first()
+        db_passport = self.db.query(PassportModel).options(joinedload(PassportModel.user)).filter(PassportModel.id == str(str_id)).first()
         if db_passport:
             return self._to_domain(db_passport)
         return None
@@ -76,11 +53,13 @@ class PassportRepository(IPassportRepository):
         logger = get_user_logger()
         logger.debug(f"[PassportRepository.get_passport_by_series_and_number] DB: fetching passport with series={series} and number={number}")
 
-        db_passport = self.db.query(PassportModel).filter(
+        db_passport = self.db.query(PassportModel).options(joinedload(PassportModel.user)).filter(
+        and_(
             PassportModel.passport_series == series,
             PassportModel.passport_number == number
+            )
         ).first()
-        
+
         if db_passport:
             return self._to_domain(db_passport)
         return None
@@ -95,11 +74,11 @@ class PassportRepository(IPassportRepository):
             logger.warning(f"[PassportRepository.update_passport] DB: passport with id={str_id} not found")
             return None
         
-        db_passport.birth_date = passport.birth_date
-        db_passport.passport_number = passport.passport_number
-        db_passport.passport_series = passport.passport_series
-        db_passport.receipt_date = passport.receipt_date
-        db_passport.user_id = str(passport.user_id)  # Store UUID as string in DB
+        for field in ["birth_date", "passport_number", "passport_series", "receipt_date", "user_id"]:
+            value = getattr(passport, field, None)
+            if value is not None:
+                setattr(db_passport, field, value)
+
         self.db.commit()
         self.db.refresh(db_passport)
 
