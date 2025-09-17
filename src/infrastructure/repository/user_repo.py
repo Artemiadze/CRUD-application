@@ -16,10 +16,7 @@ class UserRepository(IUserRepository):
             first_name=obj.first_name,
             last_name=obj.last_name,
             patronymic=obj.patronymic,
-            phone_number=obj.phone_number,
-            birth_date=obj.birth_date,
-            passport_number=obj.passport_number,
-            passport_series=obj.passport_series
+            phone_number=obj.phone_number
         )
 
     def create_user(self, user: User) -> User:
@@ -82,40 +79,8 @@ class UserRepository(IUserRepository):
         if obj:
             return self._to_domain(obj)
         return None
-    
-    def get_user_by_passport(self, series: str, number: str) -> User | None:
-        logger = get_user_logger()
-        logger.debug(f"[UserRepository.get_user_by_passport] DB: fetching user with passport={series} {number}")
 
-        obj = (
-            self.db.query(UserModel)
-            .filter(
-                UserModel.passport_series == series,
-                UserModel.passport_number == number
-            )
-            .first()
-        )
-        return self._to_domain(obj) if obj else None
-
-    def get_user_by_passport_number(self, passport_number: str) -> User | None:
-        logger = get_user_logger()
-        logger.debug(f"[UserRepository.get_user_by_passport_number] DB: fetching user with passport={passport_number}")
-
-        obj = self.db.query(UserModel).filter(UserModel.passport_number == passport_number).first()
-        if obj:
-            return self._to_domain(obj)
-        return None
-    
-    def get_user_by_passport_series(self, passport_series: str) -> User | None:
-        logger = get_user_logger()
-        logger.debug(f"[UserRepository.get_user_by_passport_series] DB: fetching user with passport={passport_series}")
-
-        obj = self.db.query(UserModel).filter(UserModel.passport_series == passport_series).first()
-        if obj:
-            return self._to_domain(obj)
-        return None
-
-    def update(self, user: User) -> User:
+    def update_user(self, user: User) -> User:
         str_id = str(user.id)
 
         logger = get_user_logger()
@@ -135,12 +100,14 @@ class UserRepository(IUserRepository):
             obj.patronymic = user.patronymic
         if user.phone_number is not None:
             obj.phone_number = user.phone_number
+
+        """
         if user.birth_date is not None:
             obj.birth_date = user.birth_date
         if user.passport_number is not None:
             obj.passport_number = user.passport_number
         if user.passport_series is not None:
-            obj.passport_series = user.passport_series
+            obj.passport_series = user.passport_series"""
 
         self.db.commit()
         self.db.refresh(obj)
