@@ -1,4 +1,4 @@
-from src.domain.users import User
+from src.domain.users import User, UserId
 from src.core.exceptions import DuplicateError, NotFoundError
 from src.domain.interfaces.iuser_repo import IUserRepository
 
@@ -29,7 +29,7 @@ class UserService:
         
         return self.repo.create_user(user)
     
-    def get_user(self, user_id: int):
+    def get_user(self, user_id: UserId):
         user = self.repo.get_user(user_id)
         if not user:
             raise NotFoundError("User", user_id)
@@ -80,7 +80,7 @@ class UserService:
         return self.repo.update(user)
 
     
-    def delete_user(self, user_id: int):
+    def delete_user(self, user_id: UserId):
         user = self.repo.get_user(user_id)
         if not user:
             raise NotFoundError("User", user_id)

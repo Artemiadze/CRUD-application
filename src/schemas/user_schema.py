@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import date, datetime
 from typing import Optional
+from uuid import UUID
 import re
 
 class UsersBase(BaseModel):
@@ -316,4 +317,4 @@ class UsersUpdate(UsersBase):
         return value
 
 class UsersOut(UsersBase):
-    id: int
+    id: UUID

@@ -1,10 +1,13 @@
-from sqlalchemy import  Column, Integer, String, Date
+from sqlalchemy import  Column, String, Date
+from uuid import uuid4
+
 from src.infrastructure.database import Base
 
 class UserModel(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
+    # Generated ID as a string to store UUID
+    id = Column(String, primary_key=True, default=lambda: str(uuid4()))
     first_name = Column(String, index=True)
     last_name = Column(String, index=True)
     patronymic = Column(String, index=True)

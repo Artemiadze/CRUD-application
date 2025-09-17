@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Optional
-from src.domain.users import User
+from src.domain.users import User, UserId
 
 class IUserRepository(ABC):
     @abstractmethod
@@ -8,7 +8,7 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    def get_user(self, user_id: int) -> Optional[User]:
+    def get_user(self, user_id: UserId) -> Optional[User]:
         pass
 
     @abstractmethod
@@ -40,5 +40,5 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    def delete_user(self, user_id: int) -> bool:
+    def delete_user(self, user_id: UserId) -> bool:
         pass

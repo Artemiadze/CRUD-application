@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List
+from uuid import UUID
 
-from src.domain.users import User
+from src.domain.users import User, UserId
 from src.schemas.user_schema import UsersCreate, UsersOut, UsersUpdate
 from src.infrastructure.database import get_db
 from src.infrastructure.repository.user_repo import UserRepository
@@ -34,15 +35,16 @@ def create_user(user_in: UsersCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/id/{user_id}", response_model=UsersOut)
-def get_user(user_id: int, db: Session = Depends(get_db)):
+def get_user(user_id: str, db: Session = Depends(get_db)):
     repo = UserRepository(db)
     service = UserService(repo)
-
+    
     logger = get_user_logger(user_id=user_id)
     logger.info(f"[get_user] GET /users/id/{user_id} - fetched user: {user_id}")
 
     try:
-        user = service.get_user(user_id)
+        parsed_id = UserId(UUID(user_id))
+        user = service.get_user(parsed_id)
     except NotFoundError:
         logger.warning(f"[get_user] User not found with ID: {user_id}")
         raise HTTPException(status_code=404, detail="User not found")
@@ -75,7 +77,7 @@ def get_user_by_full_name(first_name: str | None = Query(None),
 
 
 @router.put("/{user_id}", response_model=UsersOut)
-def update_user(user_id: int, user_updated: UsersUpdate, db: Session = Depends(get_db)):
+def update_user(user_id: str, user_updated: UsersUpdate, db: Session = Depends(get_db)):
     repo = UserRepository(db)
     service = UserService(repo)
 
@@ -83,11 +85,12 @@ def update_user(user_id: int, user_updated: UsersUpdate, db: Session = Depends(g
     logger.info(f"[update_user] PUT /users/{user_id} - update payload: {user_updated.model_dump()}")
 
     try:
-        existing_user = service.get_user(user_id)
+        parsed_id = UserId(UUID(user_id))
+        existing_user = service.get_user(parsed_id)
 
         # Create a new User instance with updated fields
         updated_user = User(
-            id=user_id,
+            id=parsed_id,
             first_name=user_updated.first_name or existing_user.first_name,
             last_name=user_updated.last_name or existing_user.last_name,
             patronymic=user_updated.patronymic or existing_user.patronymic,
@@ -111,7 +114,7 @@ def update_user(user_id: int, user_updated: UsersUpdate, db: Session = Depends(g
 
 
 @router.delete("/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(user_id: str, db: Session = Depends(get_db)):
     repo = UserRepository(db)
     service = UserService(repo)
 
@@ -119,7 +122,8 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     logger.info(f"[delete_user] DELETE /users/{user_id} - attempt to delete user")
 
     try:
-        service.delete_user(user_id)
+        parsed_id = UserId(UUID(user_id))
+        service.delete_user(parsed_id)
     except NotFoundError:
         logger.warning(f"[delete_user] User not found with ID: {user_id}")
         raise HTTPException(status_code=404, detail="User not found")

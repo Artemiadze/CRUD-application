@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
-from src.domain.users import User
+import uuid
+
+from src.domain.users import User, UserId
 from src.infrastructure.models.users import UserModel
 from src.domain.interfaces.iuser_repo import IUserRepository
 from src.core.logger import get_user_logger
@@ -10,7 +12,7 @@ class UserRepository(IUserRepository):
 
     def _to_domain(self, obj: UserModel) -> User:
         return User(
-            id=obj.id,
+            id=UserId(uuid.UUID(obj.id)), # Convert string ID back to UUID for domain model
             first_name=obj.first_name,
             last_name=obj.last_name,
             patronymic=obj.patronymic,
@@ -20,12 +22,16 @@ class UserRepository(IUserRepository):
             passport_series=obj.passport_series
         )
 
-    def create_user(self, user: User):
+    def create_user(self, user: User) -> User:
         logger = get_user_logger()
         log_message = str(user.first_name) + ", " + str(user.last_name) + ", " + str(user.patronymic)
         logger.debug(f"[UserRepository.create_user] DB: inserting user {log_message}")
+
         try:
-            obj = UserModel(**user.__dict__)
+            # Convert User domain model to UserModel ORM instance
+            user_dict = {key: value for key, value in user.__dict__.items() if key != 'id' or value is not None}
+            obj = UserModel(**user_dict)
+
             self.db.add(obj)
             self.db.commit()
             self.db.refresh(obj)
@@ -36,21 +42,26 @@ class UserRepository(IUserRepository):
             self.db.rollback()
             raise
 
-    def get_user(self, user_id: int):
+    def get_user(self, user_id: UserId) -> User | None:
+        str_id = str(user_id)
+
         logger = get_user_logger()
-        logger.debug(f"[UserRepository.get_user] DB: fetching user with id={user_id}")
-        obj = self.db.query(UserModel).filter(UserModel.id == user_id).first()
+        logger.debug(f"[UserRepository.get_user] DB: fetching user with id={str_id}")
+
+        obj = self.db.query(UserModel).filter(UserModel.id == str_id).first()
+
         if obj:
             return self._to_domain(obj)
         return None
 
     def get_user_by_full_name(self, first_name: str | None = None,
         last_name: str | None = None,
-        patronymic: str | None = None):
+        patronymic: str | None = None)  -> list[User]:
 
         logger = get_user_logger()
         log_message = str(first_name) + ", " + str(last_name) + ", " + str(patronymic)
         logger.debug(f"[UserRepository.get_user_by_name] DB: fetching user with name={log_message.strip()}")
+
         query = self.db.query(UserModel)
 
         if first_name:
@@ -63,15 +74,19 @@ class UserRepository(IUserRepository):
         objs = query.all()
         return [self._to_domain(obj) for obj in objs]
     
-    def get_user_by_phone(self, phone_number: str):
+    def get_user_by_phone(self, phone_number: str) -> User | None:
         logger = get_user_logger()
         logger.debug(f"[UserRepository.get_user_by_phone] DB: fetching user with phone_number={phone_number}")
+
         obj = self.db.query(UserModel).filter(UserModel.phone_number == phone_number).first()
         if obj:
             return self._to_domain(obj)
         return None
     
     def get_user_by_passport(self, series: str, number: str) -> User | None:
+        logger = get_user_logger()
+        logger.debug(f"[UserRepository.get_user_by_passport] DB: fetching user with passport={series} {number}")
+
         obj = (
             self.db.query(UserModel)
             .filter(
@@ -82,28 +97,33 @@ class UserRepository(IUserRepository):
         )
         return self._to_domain(obj) if obj else None
 
-    def get_user_by_passport_number(self, passport_number: str):
+    def get_user_by_passport_number(self, passport_number: str) -> User | None:
         logger = get_user_logger()
         logger.debug(f"[UserRepository.get_user_by_passport_number] DB: fetching user with passport={passport_number}")
+
         obj = self.db.query(UserModel).filter(UserModel.passport_number == passport_number).first()
         if obj:
             return self._to_domain(obj)
         return None
     
-    def get_user_by_passport_series(self, passport_series: str):
+    def get_user_by_passport_series(self, passport_series: str) -> User | None:
         logger = get_user_logger()
         logger.debug(f"[UserRepository.get_user_by_passport_series] DB: fetching user with passport={passport_series}")
+
         obj = self.db.query(UserModel).filter(UserModel.passport_series == passport_series).first()
         if obj:
             return self._to_domain(obj)
         return None
 
     def update(self, user: User) -> User:
+        str_id = str(user.id)
+
         logger = get_user_logger()
-        logger.debug(f"[UserRepository.update] DB: updating user id={user.id}")
-        obj = self.db.query(UserModel).filter(UserModel.id == user.id).first()
+        logger.debug(f"[UserRepository.update] DB: updating user id={str_id}")
+
+        obj = self.db.query(UserModel).filter(UserModel.id == str_id).first()
         if not obj:
-            logger.warning(f"[UserRepository.update] DB: user with id={user.id} not found for update")
+            logger.warning(f"[UserRepository.update] DB: user with id={str_id} not found for update")
             return None
         
         # Update only provided fields
@@ -124,17 +144,18 @@ class UserRepository(IUserRepository):
 
         self.db.commit()
         self.db.refresh(obj)
-        logger.info(f"[UserRepository.update] DB: user id={obj.id}, updated")
+        logger.info(f"[UserRepository.update] DB: user id={str(obj.id)}, updated")
         return self._to_domain(obj)
 
-    def delete_user(self, user_id: int):
+    def delete_user(self, user_id: UserId) -> bool | None:
+        str_id = str(user_id)
         logger = get_user_logger()
-        logger.debug(f"[UserRepository.delete_user] DB: deleting user id={user_id}")
-        obj = self.db.query(UserModel).filter(UserModel.id == user_id).first()
+        logger.debug(f"[UserRepository.delete_user] DB: deleting user id={str_id}")
+        obj = self.db.query(UserModel).filter(UserModel.id == str_id).first()
         if not obj:
-            logger.warning(f"[UserRepository.delete_user] DB: user with id={user_id} not found for delete")
+            logger.warning(f"[UserRepository.delete_user] DB: user with id={str_id} not found for delete")
             return None
         self.db.delete(obj)
         self.db.commit()
-        logger.info(f"[UserRepository.delete_user] DB: user with id={user_id} deleted")
+        logger.info(f"[UserRepository.delete_user] DB: user with id={str_id} deleted")
         return True
