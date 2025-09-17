@@ -8,7 +8,7 @@ from src.infrastructure.database import get_db
 from src.infrastructure.repository.user_repo import UserRepository
 from src.services.user_service import UserService
 from src.core.exceptions import DomainValidationError, DuplicateError, NotFoundError
-from src.core.logger import get_user_logger, main_logger
+from src.core.logger import get_user_logger
 
 # creating router
 router = APIRouter(prefix="/users", tags=["users"])
@@ -60,16 +60,17 @@ def get_user_by_full_name(first_name: str | None = Query(None),
     repo = UserRepository(db)
     service = UserService(repo)
 
+    logger = get_user_logger(user_id=None)
     log_message = str(first_name) + ", " + str(last_name) + ", " + str(patronymic)
-    main_logger.info(f"[get_user_by_full_name] GET /users/by_name - fetched user by name: {log_message.strip()}")
+    logger.info(f"[get_user_by_full_name] GET /users/by_name - fetched user by name: {log_message.strip()}")
 
     try:
         user = service.get_user_by_full_name(first_name, last_name, patronymic)
     except NotFoundError:
-        main_logger.warning(f"[get_user_by_full_name] User not found with name: {log_message.strip()}")
+        logger.warning(f"[get_user_by_full_name] User not found with name: {log_message.strip()}")
         raise HTTPException(status_code=404, detail="User not found")
     
-    main_logger.info(f"[get_user_by_full_name] User retrieved: {log_message.strip()}")
+    logger.info(f"[get_user_by_full_name] User retrieved: {log_message.strip()}")
     return user
 
 
