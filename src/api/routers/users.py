@@ -3,10 +3,9 @@ from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
 
-from src.domain.users import User, UserId
+from src.domain.identifiers  import UserId
 from src.schemas.user_schema import UsersCreate, UsersOut, UsersUpdate
 from src.infrastructure.database import get_db
-from src.infrastructure.repository.user_repo import UserRepository
 from src.services.user_service import UserService
 from src.utils.exceptions import DomainValidationError, DuplicateError, NotFoundError
 from src.core.logger import get_logger

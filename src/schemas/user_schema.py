@@ -2,7 +2,6 @@ from pydantic import BaseModel, ConfigDict, field_validator
 from src.utils.validators import validate_first_name, validate_last_name, validate_patronymic, validate_phone_number
 from typing import Optional
 from uuid import UUID
-import re
 
 class UsersBase(BaseModel):
     model_config = ConfigDict(from_attributes=True) # to read data from ORM models

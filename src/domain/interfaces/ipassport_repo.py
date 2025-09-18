@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Optional
-from src.domain.passport import Passport, PassportID
+
+from src.domain.passport import Passport
+from src.domain.identifiers  import PassportId
 
 class IPassportRepository(ABC):
     @abstractmethod
@@ -8,7 +10,7 @@ class IPassportRepository(ABC):
         pass
 
     @abstractmethod
-    def get_passport(self, user_id: PassportID) -> Optional[Passport]:
+    def get_passport(self, user_id: PassportId) -> Optional[Passport]:
         pass
 
     @abstractmethod
@@ -28,5 +30,5 @@ class IPassportRepository(ABC):
         pass
 
     @abstractmethod
-    def delete_passport(self, user_id: PassportID) -> bool:
+    def delete_passport(self, user_id: PassportId) -> bool:
         pass

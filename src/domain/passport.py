@@ -1,15 +1,11 @@
 from dataclasses import dataclass
 from datetime import date
-from typing import NewType
-from uuid import UUID
 
-from src.domain.users import UserId
-
-PassportID = NewType("PassportID", UUID)
+from src.domain.identifiers  import UserId, PassportId
 
 @dataclass
 class Passport:
-    id: PassportID
+    id: PassportId
     birth_date: date
     passport_series: str
     passport_number: str 

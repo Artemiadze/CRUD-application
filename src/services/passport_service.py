@@ -1,6 +1,7 @@
 from datetime import date
 
-from src.domain.passport import Passport, PassportID
+from src.domain.passport import Passport
+from src.domain.identifiers  import PassportId
 from src.utils.exceptions import DuplicateError, NotFoundError
 from src.domain.interfaces.ipassport_repo import IPassportRepository
 
@@ -24,7 +25,7 @@ class PassportService:
 
         return self.repo.create_passport(passport)
 
-    def get_passport(self, passport_id: PassportID):
+    def get_passport(self, passport_id: PassportId):
         passport = self.repo.get_passport(passport_id)
         if not passport:
             raise NotFoundError("Passport", passport_id)
@@ -66,7 +67,7 @@ class PassportService:
         
         return self.repo.update_passport(passport)
     
-    def delete_passport(self, passport_id: PassportID):
+    def delete_passport(self, passport_id: PassportId):
         user = self.repo.get_passport(passport_id)
         if not user:
             raise NotFoundError("Passport", passport_id)

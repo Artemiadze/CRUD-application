@@ -1,10 +1,11 @@
 from sqlalchemy.orm import Session, joinedload
 import uuid
 
-from src.domain.users import User, UserId
+from src.domain.users import User
+from src.domain.identifiers  import UserId
 from src.infrastructure.models.users import UserModel
 from src.domain.interfaces.iuser_repo import IUserRepository
-from src.core.logger import get_user_logger
+from src.core.logger import get_logger
 
 class UserRepository(IUserRepository):
     def __init__(self, db: Session):
@@ -20,7 +21,7 @@ class UserRepository(IUserRepository):
         )
 
     def create_user(self, user: User) -> User:
-        logger = get_user_logger()
+        logger = get_logger()
         log_message = str(user.first_name) + ", " + str(user.last_name) + ", " + str(user.patronymic)
         logger.debug(f"[UserRepository.create_user] DB: inserting user {log_message}")
 
@@ -42,7 +43,7 @@ class UserRepository(IUserRepository):
     def get_user(self, user_id: UserId) -> User | None:
         str_id = str(user_id)
 
-        logger = get_user_logger()
+        logger = get_logger()
         logger.debug(f"[UserRepository.get_user] DB: fetching user with id={str_id}")
 
         obj = self.db.query(UserModel).options(joinedload(UserModel.passports)).filter(UserModel.id == str_id).first()
@@ -55,7 +56,7 @@ class UserRepository(IUserRepository):
         last_name: str | None = None,
         patronymic: str | None = None)  -> list[User]:
 
-        logger = get_user_logger()
+        logger = get_logger()
         log_message = str(first_name) + ", " + str(last_name) + ", " + str(patronymic)
         logger.debug(f"[UserRepository.get_user_by_name] DB: fetching user with name={log_message.strip()}")
 
@@ -72,7 +73,7 @@ class UserRepository(IUserRepository):
         return [self._to_domain(obj) for obj in objs]
     
     def get_user_by_phone(self, phone_number: str) -> User | None:
-        logger = get_user_logger()
+        logger = get_logger()
         logger.debug(f"[UserRepository.get_user_by_phone] DB: fetching user with phone_number={phone_number}")
 
         obj = self.db.query(UserModel).options(joinedload(UserModel.passports)).filter(UserModel.phone_number == phone_number).first()
@@ -83,7 +84,7 @@ class UserRepository(IUserRepository):
     def update_user(self, user: User) -> User:
         str_id = str(user.id)
 
-        logger = get_user_logger()
+        logger = get_logger()
         logger.debug(f"[UserRepository.update] DB: updating user id={str_id}")
         
         obj = self.db.query(UserModel).options(joinedload(UserModel.passports))\
@@ -106,7 +107,7 @@ class UserRepository(IUserRepository):
 
     def delete_user(self, user_id: UserId) -> bool | None:
         str_id = str(user_id)
-        logger = get_user_logger()
+        logger = get_logger()
         logger.debug(f"[UserRepository.delete_user] DB: deleting user id={str_id}")
 
         obj = self.db.query(UserModel).filter(UserModel.id == str_id).first()

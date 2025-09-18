@@ -4,7 +4,7 @@ from typing import Optional
 from uuid import UUID
 
 from src.utils.validators import validate_birth_date, validate_receipt_date, validate_passport_series, validate_passport_number, validate_user_id
-from src.domain.users import UserId
+from src.domain.identifiers import UserId
 
 class PassportBase(BaseModel):
     model_config = ConfigDict(from_attributes=True) # to read data from ORM models

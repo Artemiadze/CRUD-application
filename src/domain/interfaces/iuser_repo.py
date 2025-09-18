@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Optional
-from src.domain.users import User, UserId
+
+from src.domain.users import User
+from src.domain.identifiers import UserId
 
 class IUserRepository(ABC):
     @abstractmethod
