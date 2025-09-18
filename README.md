@@ -37,12 +37,22 @@ http://127.0.0.1:8000/docs
 6. For example, enter in request body in the field 'POST: Create User':
 ```json
 {
-  "first_name": "Abe",
-  "last_name": "Who",
-  "patronymic": "Bea",
-  "phone_number": "89204001940",
-  "birth_date": "1995-09-16",
-  "passport_series": "3333",
-  "passport_number": "077777"
+  "first_name": "string",
+  "last_name": "string",
+  "patronymic": "string",
+  "phone_number": "string"
 }
 ```
+
+- and in 'POST: create Passport':
+```json
+{
+  "birth_date": "2025-09-18",
+  "passport_series": "string",
+  "passport_number": "string",
+  "receipt_date": "2025-09-18",
+  "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+```
+
+7. Command GET User give all information about Users, including passport's data
