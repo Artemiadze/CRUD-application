@@ -3,7 +3,6 @@ import uuid
 
 from src.domain.users import User, UserId
 from src.infrastructure.models.users import UserModel
-from src.infrastructure.models.passport import PassportModel
 from src.domain.interfaces.iuser_repo import IUserRepository
 from src.core.logger import get_user_logger
 
