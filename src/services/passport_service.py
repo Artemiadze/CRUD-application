@@ -1,7 +1,7 @@
 from datetime import date
 
 from src.domain.passport import Passport, PassportID
-from src.core.exceptions import DuplicateError, NotFoundError
+from src.utils.exceptions import DuplicateError, NotFoundError
 from src.domain.interfaces.ipassport_repo import IPassportRepository
 
 class PassportService:

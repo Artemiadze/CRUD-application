@@ -1,6 +1,6 @@
 from src.domain.users import User, UserId
 from src.domain.passport import Passport, PassportID
-from src.core.exceptions import DuplicateError, NotFoundError
+from src.utils.exceptions import DuplicateError, NotFoundError
 from src.domain.interfaces.ipassport_repo import IPassportRepository
 from src.domain.interfaces.iuser_repo import IUserRepository
 

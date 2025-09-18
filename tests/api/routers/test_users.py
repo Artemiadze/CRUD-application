@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch
 import uuid
 
-from src.core.exceptions import NotFoundError
+from src.utils.exceptions import NotFoundError
 from src.api.routers.users import router
 from src.schemas.user_schema import UsersUpdate
 from src.domain.users import User

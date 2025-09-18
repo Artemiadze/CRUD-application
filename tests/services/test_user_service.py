@@ -3,7 +3,7 @@ import uuid
 from unittest.mock import Mock
 
 from src.domain.users import User
-from src.core.exceptions import DuplicateError, NotFoundError
+from src.utils.exceptions import DuplicateError, NotFoundError
 from src.services.user_service import UserService
 
 test_uuid = str(uuid.uuid4())
