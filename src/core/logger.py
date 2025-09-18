@@ -2,14 +2,15 @@ import logging
 from typing import Optional
 from src.core.config import configs
 
-class UserLoggerAdapter(logging.LoggerAdapter):
+class LoggerAdapter(logging.LoggerAdapter):
     """
     Custom logger adapter to add contextual information to log records.
     """
 
     def process(self, msg, kwargs):
-        user_id = self.extra.get("user_id", "anon")
-        return f"[user_id={user_id}] {msg}", kwargs
+        # Add all extra context information to the log message
+        context = " ".join(f"{k}={v}" for k, v in self.extra.items())
+        return f"[{context}] {msg}", kwargs
     
 
 def setup_logging() -> logging.Logger:
@@ -46,16 +47,15 @@ def setup_logging() -> logging.Logger:
     return logger
 
 
-def get_user_logger(user_id: Optional[int] = None) -> UserLoggerAdapter:
+def get_logger(**kwargs) -> LoggerAdapter:
     """
-    Factory function to get a logger with user_id context.
-    If user_id is None, it defaults to 'anon'.
-    
+    Factory function to get a logger with arbitrary context.
+    If a context value is None, it defaults to 'anon'.
     Args:
-        user_id (Optional[int]): The ID of the user for logging context.
-    
+        **kwargs: Arbitrary keyword arguments for logging context.
     Returns:
-        UserLoggerAdapter: Logger with user_id context.
+        LoggerAdapter: Logger with provided context.
     """
     main_logger = logging.getLogger("app")
-    return UserLoggerAdapter(main_logger, {"user_id": user_id if user_id is not None else "anon"})
+    clean_kwargs = {k: (v if v is not None else "anon") for k, v in kwargs.items()}
+    return LoggerAdapter(main_logger, clean_kwargs)
