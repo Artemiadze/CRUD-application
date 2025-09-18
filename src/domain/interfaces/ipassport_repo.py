@@ -16,6 +16,14 @@ class IPassportRepository(ABC):
         pass
 
     @abstractmethod
+    def get_passport_by_number(self, number: str) -> Passport | None:
+        pass
+
+    @abstractmethod
+    def get_passport_by_series(self, series: str) -> Passport | None:
+        pass
+
+    @abstractmethod
     def update_passport(self, user: Passport) -> Passport:
         pass
 

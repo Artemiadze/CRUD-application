@@ -27,7 +27,7 @@ class PassportRepository(IPassportRepository):
         logger.debug(f"[PassportRepository.create_passport] DB: inserting passport {log_message}")
 
         try:
-            db_obj = {key: value for key, value in passport.__dict__.items() if key != 'id' or value is not None}
+            db_obj = {key: value for key, value in passport.__dict__.items() if key != 'id' and value is not None}
             db_passport = PassportModel(**db_obj)
             self.db.add(db_passport)
             self.db.commit()
@@ -62,6 +62,24 @@ class PassportRepository(IPassportRepository):
 
         if db_passport:
             return self._to_domain(db_passport)
+        return None
+    
+    def get_passport_by_number(self, number: str) -> Passport | None:
+        logger = get_user_logger()
+        logger.debug(f"[PassportRepository.get_passport_by_number] DB: fetching user with passport={number}")
+
+        obj = self.db.query(PassportModel).filter(PassportModel.passport_number == number).first()
+        if obj:
+            return self._to_domain(obj)
+        return None
+    
+    def get_passport_by_series(self, series: str) -> Passport | None:
+        logger = get_user_logger()
+        logger.debug(f"[PassportRepository.get_passport_by_series] DB: fetching user with passport={series}")
+
+        obj = self.db.query(PassportModel).filter(PassportModel.passport_series == series).first()
+        if obj:
+            return self._to_domain(obj)
         return None
     
     def update_passport(self, passport: Passport) -> Passport:
