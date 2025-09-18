@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from src.infrastructure.database import Base, engine
 from src.core.logger import setup_logging
-from src.api.routers import users
+from src.api.routers import users, passport  
 from src.infrastructure.models.users import UserModel
 from src.infrastructure.models.passport import PassportModel
 
@@ -13,5 +13,6 @@ setup_logging()
 # initialize FastAPI app
 app = FastAPI()
 
-# including user router
-app.include_router(users.router)
+# including all router
+app.include_router(users.router, prefix="/users", tags=["users"])
+app.include_router(passport.router, prefix="/passports", tags=["passports"])
