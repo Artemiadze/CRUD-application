@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 
 from src.infrastructure.database import get_db
+from src.domain.passport import Passport
 from src.schemas.passport_schema import PassportCreate, PassportUpdate, PassportOut
+from src.infrastructure.repository.passport_repo import PassportRepository
 from src.services.passport_service import PassportService
 from src.utils.exceptions import NotFoundError, DuplicateError, DomainValidationError
 from src.core.logger import get_logger
@@ -12,7 +14,9 @@ from src.core.logger import get_logger
 router = APIRouter(prefix="/passports", tags=["passports"])
 
 def get_service(db: Session = Depends(get_db)) -> PassportService:
-    return PassportService(db)
+    repo = PassportRepository(db)
+    return PassportService(repo)
+
 
 @router.post("/", response_model=PassportOut)
 def create_passport(passport_in: PassportCreate, service: PassportService = Depends(get_service)):
@@ -36,7 +40,7 @@ def create_passport(passport_in: PassportCreate, service: PassportService = Depe
 
 @router.get("/{passport_id}", response_model=PassportOut)
 def get_passport(passport_id: UUID, service: PassportService = Depends(get_service)):
-    logger = get_logger(passport_id)
+    logger = get_logger(passport_id=passport_id)
     logger.info(f"[get_passport] id={passport_id}")
 
     try:
@@ -47,11 +51,22 @@ def get_passport(passport_id: UUID, service: PassportService = Depends(get_servi
     
 @router.put("/{passport_id}", response_model=PassportOut)
 def update_passport(passport_id: UUID, passport_in: PassportUpdate, service: PassportService = Depends(get_service)):
-    logger = get_logger(passport_id)
+    logger = get_logger(passport_id=passport_id)
     logger.info(f"[update_passport] payload={passport_in.model_dump()}")
 
     try:
-        return service.update_passport(passport_id, passport_in)
+        existing = service.get_passport(passport_id)
+
+        updated_passport = Passport(
+            id=passport_id,
+            birth_date=passport_in.birth_date or existing.birth_date,
+            passport_number=passport_in.passport_number or existing.passport_number,
+            passport_series=passport_in.passport_series or existing.passport_series,
+            receipt_date=passport_in.receipt_date or existing.receipt_date,
+            user_id=existing.user_id
+        )
+
+        return service.update_passport(updated_passport)
     except NotFoundError:
         logger.warning(f"[update_passport] not found id={passport_id}")
         raise HTTPException(status_code=404, detail="Passport not found")
@@ -65,7 +80,7 @@ def update_passport(passport_id: UUID, passport_in: PassportUpdate, service: Pas
 
 @router.delete("/{passport_id}")
 def delete_passport(passport_id: UUID, service: PassportService = Depends(get_service)):
-    logger = get_logger(passport_id)
+    logger = get_logger(passport_id=passport_id)
     logger.info(f"[delete_passport] attempt to delete id={passport_id}")
 
     try:

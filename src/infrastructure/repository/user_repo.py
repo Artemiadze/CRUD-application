@@ -1,10 +1,11 @@
 from sqlalchemy.orm import Session, joinedload
-import uuid
+from uuid import UUID
 
 from src.domain.users import User
 from src.domain.identifiers  import UserId
 from src.infrastructure.models.users import UserModel
 from src.domain.interfaces.iuser_repo import IUserRepository
+from src.domain.passport import Passport
 from src.core.logger import get_logger
 
 class UserRepository(IUserRepository):
@@ -13,12 +14,21 @@ class UserRepository(IUserRepository):
 
     def _to_domain(self, obj: UserModel) -> User:
         return User(
-            id=UserId(uuid.UUID(obj.id)), # Convert string ID back to UUID for domain model
+            id=UUID(obj.id),
             first_name=obj.first_name,
             last_name=obj.last_name,
             patronymic=obj.patronymic,
-            phone_number=obj.phone_number
+            phone_number=obj.phone_number,
+            passports=[Passport(
+                id=UUID(p.id),
+                birth_date=p.birth_date,
+                passport_number=p.passport_number,
+                passport_series=p.passport_series,
+                receipt_date=p.receipt_date,
+                user_id=UUID(p.user_id)
+            ) for p in obj.passports]
         )
+
 
     def create_user(self, user: User) -> User:
         logger = get_logger()

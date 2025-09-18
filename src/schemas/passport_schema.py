@@ -1,9 +1,9 @@
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 from datetime import date
 from typing import Optional
 from uuid import UUID
 
-from src.utils.validators import validate_birth_date, validate_receipt_date, validate_passport_series, validate_passport_number, validate_user_id
+from src.utils.validators import validate_birth_date, validate_receipt_date, validate_passport_series, validate_passport_number, validate_user_id, convert_dates
 from src.domain.identifiers import UserId
 
 class PassportBase(BaseModel):
@@ -39,3 +39,6 @@ class PassportUpdate(BaseModel):
     
 class PassportOut(PassportBase):
     id: UUID
+
+    _validate_birth_date = model_validator(mode="before")(convert_dates)
+    _validate_receipt_date = model_validator(mode="before")(convert_dates)

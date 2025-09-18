@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_
-import uuid
+from uuid import UUID
 
 from src.domain.passport import Passport
 from src.domain.identifiers  import PassportId
@@ -14,12 +14,12 @@ class PassportRepository(IPassportRepository):
 
     def _to_domain(self, obj: PassportModel) -> Passport:
         return Passport(
-            id=PassportId(uuid.UUID(obj.id)), # Convert string ID back to UUID for domain model
+            id=UUID(obj.id),
+            user_id=UUID(obj.user_id),
             birth_date=obj.birth_date,
             passport_number=obj.passport_number,
             passport_series=obj.passport_series,
             receipt_date=obj.receipt_date,
-            user_id=PassportId(uuid.UUID(obj.user_id))  # Convert string ID back to UUID for domain model
         )
     
     def create_passport(self, passport: Passport) -> Passport:
@@ -28,7 +28,11 @@ class PassportRepository(IPassportRepository):
         logger.debug(f"[PassportRepository.create_passport] DB: inserting passport {log_message}")
 
         try:
-            db_obj = {key: value for key, value in passport.__dict__.items() if key != 'id' and value is not None}
+            db_obj = {
+                key: str(value) if key in ('id', 'user_id') and isinstance(value, UUID) else value
+                for key, value in passport.__dict__.items()
+                if value is not None
+            }
             db_passport = PassportModel(**db_obj)
             self.db.add(db_passport)
             self.db.commit()
@@ -88,7 +92,7 @@ class PassportRepository(IPassportRepository):
         logger = get_logger()
         logger.debug(f"[PassportRepository.update_passport] DB: updating passport with id={str_id}")
 
-        db_passport = self.db.query(PassportModel).filter(PassportModel.id == str(passport.id)).first()
+        db_passport = self.db.query(PassportModel).filter(PassportModel.id == str_id).first()
         if not db_passport:
             logger.warning(f"[PassportRepository.update_passport] DB: passport with id={str_id} not found")
             return None
@@ -96,7 +100,10 @@ class PassportRepository(IPassportRepository):
         for field in ["birth_date", "passport_number", "passport_series", "receipt_date", "user_id"]:
             value = getattr(passport, field, None)
             if value is not None:
+                if field in ("user_id", "id") and isinstance(value, UUID):
+                    value = str(value)
                 setattr(db_passport, field, value)
+
 
         self.db.commit()
         self.db.refresh(db_passport)

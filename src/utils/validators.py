@@ -183,3 +183,37 @@ def validate_user_id(value):
             raise ValueError('user_id must be a valid UUID string')
         
     raise ValueError('user_id must be a UUID or a valid UUID string')
+
+def convert_dates(obj):
+    for field in ("birth_date", "receipt_date"):
+        value = getattr(obj, field, None)
+        if value is None:
+            continue
+
+        if isinstance(value, date):
+            continue
+        elif isinstance(value, datetime):
+            setattr(obj, field, value.date())
+        elif isinstance(value, str):
+            date_formats = [
+                "%Y-%m-%d",
+                "%d.%m.%Y",
+                "%d/%m/%Y",
+                "%d-%m-%Y",
+                "%Y.%m.%d",
+                "%Y/%m/%d",
+            ]
+            parsed = None
+            for fmt in date_formats:
+                try:
+                    parsed = datetime.strptime(value.strip(), fmt).date()
+                    break
+                except ValueError:
+                    continue
+            if parsed is None:
+                raise ValueError(f"Field {field} must be a valid date string, got '{value}'")
+            setattr(obj, field, parsed)
+        else:
+            raise TypeError(f"Field {field} must be a date, datetime, or string, got {type(value)}")
+
+    return obj
